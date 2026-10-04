@@ -1,6 +1,45 @@
 export const $ = selector => document.querySelector(selector);
 export function el(tag, className, text) { const node = document.createElement(tag); if(className) node.className = className; if(text !== undefined) node.textContent = text; return node; }
 export function button(label, onClick, className = 'text-button') { const node = el('button', className, label); node.type = 'button'; node.addEventListener('click', onClick); return node; }
+export function statusIndicator(status) {
+  const color = Number.isInteger(status) ? ['red','yellow','green'][status] : undefined;
+  const text = color ? ['Not Working','Needs Testing','Fully Working'][status] : 'Missing Info';
+  const dot = el('span', 'emulator-status');
+  dot.dataset.status = color || 'unknown';
+  dot.tabIndex = 0;
+  dot.setAttribute('role', 'img');
+  dot.setAttribute('aria-label', text);
+  const tooltip = el('span', 'status-tooltip', text);
+  tooltip.setAttribute('popover', 'manual');
+  tooltip.setAttribute('role', 'tooltip');
+  dot.append(tooltip);
+  let listeners;
+  const hide = () => {
+    tooltip.hidePopover();
+    listeners?.abort();
+  };
+  const show = () => {
+    if (tooltip.matches(':popover-open')) return;
+    tooltip.showPopover();
+    const rect = dot.getBoundingClientRect();
+    const width = tooltip.offsetWidth, height = tooltip.offsetHeight;
+    tooltip.style.left = `${Math.max(8, Math.min(rect.left, innerWidth - width - 8))}px`;
+    tooltip.style.top = `${rect.top >= height + 12 ? rect.top - height - 8 : rect.bottom + 8}px`;
+    listeners = new AbortController();
+    const options = {capture:true, signal:listeners.signal};
+    window.addEventListener('scroll', hide, options);
+    window.addEventListener('resize', hide, options);
+    document.addEventListener('keydown', event => { if (event.key === 'Escape') hide(); }, options);
+  };
+  dot.addEventListener('pointerenter', show);
+  dot.addEventListener('pointerleave', hide);
+  dot.addEventListener('focus', show);
+  dot.addEventListener('blur', hide);
+  tooltip.addEventListener('toggle', () => {
+    if (!tooltip.matches(':popover-open')) listeners?.abort();
+  });
+  return dot;
+}
 let toastTimer;
 export function toast(message, error = false) { clearTimeout(toastTimer); const node = el('div', `toast${error ? ' error' : ''}`, message); $('#toasts').replaceChildren(node); toastTimer = setTimeout(() => node.remove(), 4200); }
 export function showError(selector, message) { const node = $(selector); node.textContent = message || ''; node.hidden = !message; }

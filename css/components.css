@@ -53,7 +53,9 @@ select option { background: #22212b; color: #f0eff7; }
 
 .row-label.has-status{display:flex;align-items:center;gap:10px}
 .row-label.has-status>span:last-child{min-width:0}
-.emulator-status{--status-color:#858294;--status-glow:#85829400;width:7px;height:7px;flex:none;border-radius:50%;background:var(--status-color);box-shadow:0 0 0 3px color-mix(in srgb,var(--status-color) 9%,transparent),0 0 9px 2px var(--status-glow)}
+.emulator-status{--status-color:#858294;--status-glow:#85829400;width:19px;height:19px;margin:-6px;flex:none;display:grid;place-items:center;border-radius:50%;cursor:help}
+.emulator-status::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--status-color);box-shadow:0 0 0 3px color-mix(in srgb,var(--status-color) 9%,transparent),0 0 9px 2px var(--status-glow)}
+.status-tooltip{position:fixed;inset:auto;margin:0;padding:7px 11px;border:1px solid #c6b4ef40;border-radius:8px;background:#292432;color:#eee7f7;box-shadow:0 5px 20px #0005;font-size:.72rem;font-weight:500;line-height:1.4;white-space:nowrap;pointer-events:none}
 .emulator-status[data-status="red"]{--status-color:#ef8799;--status-glow:#ef87994d}
 .emulator-status[data-status="yellow"]{--status-color:#ecd28b;--status-glow:#ecd28b4d}
 .emulator-status[data-status="green"]{--status-color:#8bd6b1;--status-glow:#8bd6b14d}

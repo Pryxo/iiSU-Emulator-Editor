@@ -7,7 +7,7 @@ import {loadConsoles} from './console-loader.js';
 import {createPlatformFilter} from './platform-filter.js';
 import {clone, equal, planChange, planRemoval, planConsoleChange, planConsoleRemoval, applyPlan, rebuild, changesBetween} from './config-merger.js';
 import {downloadJSON} from './download.js';
-import {$, el, button, toast, showError, jsonViewer, diffView, openPreview, setupDialogs, confirmAction, safeLink, descriptionView} from './ui.js';
+import {$, el, button, toast, showError, jsonViewer, diffView, openPreview, setupDialogs, confirmAction, safeLink, descriptionView, statusIndicator} from './ui.js';
 
 const state = {
   file:null, original:null, modified:null,
@@ -160,15 +160,8 @@ function renderRow(consoleEntry, emulator, definition, isDatabase) {
   const label = el('div','row-label',emulator.name);
   const controls = el('div','row-controls');
   if (isDatabase) {
-    const status = definition?.status;
-    const color = Number.isInteger(status) ? ['red','yellow','green'][status] : undefined;
-    const dot = el('span', 'emulator-status');
-    dot.dataset.status = color || 'unknown';
-    dot.title = color ? ['Not Working','Needs Testing','Fully Working'][status] : 'Missing Info';
-    dot.setAttribute('role', 'img');
-    dot.setAttribute('aria-label', dot.title);
     label.classList.add('has-status');
-    label.replaceChildren(dot, el('span', '', emulator.name));
+    label.replaceChildren(statusIndicator(definition?.status), el('span', '', emulator.name));
     const present = state.modified.consoles.some(c => consoleKey(c.shortName) === consoleKey(consoleEntry.shortName));
     const plan = present ? planChange(state.modified,definition,consoleEntry.shortName,emulator.id) : null;
     const exists = consoleEntry.emulators.some(e => e.id.toLowerCase() === emulator.id.toLowerCase());

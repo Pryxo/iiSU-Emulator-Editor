@@ -83,6 +83,35 @@ await page.route('**/consoles/**', route => {
  await page.locator('#database-list .emulator-row').first().waitFor();
  assert.equal(await page.locator('#database-count').textContent(),registry.emulators.length + ' emulators');
  assert.equal(await page.locator('#database-list .emulator-row').count(),[...definitions.values()].reduce((sum,d)=>sum+d.entries.length,0));
+ // Status help appears immediately on hover/focus, including unknown values.
+ for (const [status, text] of [[0,'Not Working'],[1,'Needs Testing'],[2,'Fully Working'],[undefined,'Missing Info'],['0','Missing Info'],[3,'Missing Info']]) {
+  definition.status = status;
+  await page.reload();
+  const dot = row('database',payload.id).locator('.emulator-status');
+  const tooltip = dot.getByRole('tooltip');
+  await dot.hover();
+  await tooltip.waitFor({state:'visible'});
+  assert.equal(await tooltip.textContent(),text);
+  assert.equal(await dot.getAttribute('aria-label'),text);
+  await page.mouse.move(0,0);
+  await tooltip.waitFor({state:'hidden'});
+  await dot.focus();
+  await tooltip.waitFor({state:'visible'});
+  await page.keyboard.press('Escape');
+  await tooltip.waitFor({state:'hidden'});
+ }
+ delete definition.status;
+ await page.setViewportSize({width:390,height:844});
+ const statusDot=row('database',payload.id).locator('.emulator-status');
+ await statusDot.hover();
+ const statusTooltip=statusDot.getByRole('tooltip');
+ await statusTooltip.waitFor({state:'visible'});
+ const tooltipBounds=await statusTooltip.boundingBox();
+ assert.ok(tooltipBounds.x>=0 && tooltipBounds.x+tooltipBounds.width<=390 && tooltipBounds.y>=0 && tooltipBounds.y+tooltipBounds.height<=844);
+ await page.screenshot({path:'.qa/status-tooltip-mobile.png',animations:'disabled'});
+ await page.mouse.move(0,0);
+ await page.setViewportSize({width:1440,height:960});
+ assert.equal(await page.locator('#config-list .emulator-status').count(),0);
  const trigger=page.getByRole('combobox',{name:'Filter by console'});
  await trigger.click();
  await option(mapping.shortName).click();
