@@ -1,5 +1,5 @@
 {
-  "description": "JoiPlay platform for .jp and .joiplay shortcut files. Add this console, then add the JoiPlay emulator below. Replacing the console resets its metadata and removes its current emulators.",
+  "description": "Look on discord, there is nothing official and you gonna make the shortcut files yourself",
   "console": {
     "shortName": "moonlight",
     "longName": "Moonlight Game Streaming",

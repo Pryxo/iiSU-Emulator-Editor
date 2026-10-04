@@ -1,5 +1,5 @@
 {
-  "description": "JoiPlay platform for .jp and .joiplay shortcut files. Add this console, then add the JoiPlay emulator below. Replacing the console resets its metadata and removes its current emulators.",
+  "description": "Supports .ps4/.PS4 only yet cause only ps4 emulator in the list and it only supports starting via the title ID/CUSA ID",
   "console": {
     "shortName": "ps4",
     "longName": "Sony PlayStation 4",
