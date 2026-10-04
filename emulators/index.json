@@ -20,6 +20,10 @@
     {
       "id": "emucore-x",
       "path": "emucore-x/emulator.json"
+    },
+    {
+      "id": "bachata-s4",
+      "path": "bachata-s4/emulator.json"
     }
   ]
 }

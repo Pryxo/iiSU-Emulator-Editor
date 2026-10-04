@@ -1,0 +1,16 @@
+{
+  "description": "JoiPlay platform for .jp and .joiplay shortcut files. Add this console, then add the JoiPlay emulator below. Replacing the console resets its metadata and removes its current emulators.",
+  "console": {
+    "shortName": "ps4",
+    "longName": "Sony PlayStation 4",
+    "releaseYear": "2013",
+    "releaseDate": "2013-11-15",
+    "manufacturer": "Sony",
+    "retroAchievementsId": "NA",
+    "romExtensions": [
+      ".ps4",
+      ".PS4"
+    ],
+    "emulators": []
+  }
+}

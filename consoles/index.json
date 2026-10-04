@@ -8,6 +8,10 @@
     {
       "id": "moonlight",
       "path": "moonlight/console.json"
+    },
+    {
+      "id": "ps4",
+      "path": "ps4/console.json"
     }
   ]
 }
