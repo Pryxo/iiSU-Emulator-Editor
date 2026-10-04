@@ -1,0 +1,15 @@
+{
+  "description": "JoiPlay platform for .jp and .joiplay shortcut files. Add this console, then add the JoiPlay emulator below. Replacing the console resets its metadata and removes its current emulators.",
+  "console": {
+    "shortName": "moonlight",
+    "longName": "Moonlight Game Streaming",
+    "releaseYear": "2018",
+    "releaseDate": "2018-12-25",
+    "manufacturer": "Moonlight Stream",
+    "retroAchievementsId": "NA",
+    "romExtensions": [
+      ".moonlight"
+    ],
+    "emulators": []
+  }
+}
