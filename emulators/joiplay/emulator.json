@@ -1,5 +1,6 @@
 {
   "description": "Official JoiPlay isnt supported since they dont export the activity to start games, check this out for more infos on how to get joiplay working in iiSU, https://github.com/Pryxo/JoiPlay-Shortcut-Generator",
+  "status": 2, 
   "entries": [
     {
       "shortName": "joiplay",

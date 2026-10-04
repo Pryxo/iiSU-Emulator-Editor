@@ -1,5 +1,6 @@
 {
   "description": "Vita3K-Plus made by nckstwrt, https://github.com/nckstwrt/Vita3K-Plus/ | JSON Source by rhodynit",
+  "status": 2, 
   "entries": [
     {
       "shortName": "psvita",
