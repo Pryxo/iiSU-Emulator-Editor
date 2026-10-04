@@ -1,5 +1,6 @@
 {
   "description": "EmuCoreX made by sashkinbro, https://github.com/sashkinbro/EmuCoreX | JSON Source by Pryxo | Not tested yet",
+  "status": 1, 
   "entries": [
     {
       "shortName": "ps2",
