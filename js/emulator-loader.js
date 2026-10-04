@@ -19,15 +19,18 @@ async function getJSON(url) { const response = await fetch(url, {cache:'no-cache
 export async function loadEmulators() {
   const base = new URL('../emulators/index.json', import.meta.url);
   base.search = new URL(import.meta.url).search;
+  return loadRegistry(base,'emulators','emulator.json',validateDefinition);
+}
+export async function loadRegistry(base, collection, filename, validate) {
   const registry = await getJSON(base);
-  if (registry.schemaVersion !== 1 || !Array.isArray(registry.emulators)) throw new Error('Unsupported emulator registry version.');
+  if (registry.schemaVersion !== 1 || !Array.isArray(registry[collection])) throw new Error(`Unsupported ${collection} registry version.`);
   const ids = new Set();
-  const results = await Promise.allSettled(registry.emulators.map(async item => {
-    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(item.id) || item.path !== `${item.id}/emulator.json` || ids.has(item.id)) throw new Error('Invalid or duplicate registry entry.');
+  const results = await Promise.allSettled(registry[collection].map(async item => {
+    if (!isObject(item) || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(item.id) || item.path !== `${item.id}/${filename}` || ids.has(item.id)) throw new Error('Invalid or duplicate registry entry.');
     ids.add(item.id);
     const url = new URL(item.path, base);
     url.search = base.search;
-    return validateDefinition(await getJSON(url), item.id);
+    return validate(await getJSON(url), item.id);
   }));
   return {definitions: results.filter(r => r.status === 'fulfilled').map(r => r.value), errors: results.filter(r => r.status === 'rejected').map(r => r.reason.message)};
 }

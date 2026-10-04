@@ -8,7 +8,7 @@ import {execFileSync} from 'node:child_process';
 test('deployment versions the full module graph and changes URLs after catalog edits',async()=>{
  const root=await mkdtemp(path.join(tmpdir(),'emuconfig-build-'));
  try {
-  for(const dir of ['scripts','js','css','emulators/example','assets','docs']) await mkdir(path.join(root,dir),{recursive:true});
+  for(const dir of ['scripts','js','css','emulators/example','consoles/example','assets','docs']) await mkdir(path.join(root,dir),{recursive:true});
   await copyFile(new URL('../scripts/build.js',import.meta.url),path.join(root,'scripts/build.js'));
   await writeFile(path.join(root,'package.json'),'{"type":"module"}');
   await writeFile(path.join(root,'LICENSE'),'test');
@@ -31,6 +31,11 @@ test('deployment versions the full module graph and changes URLs after catalog e
   build();
   assert.notEqual(await read('dist/index.html'),first);
   assert.ok(!(await read('dist/js/app.js')).includes(version));
+  const emulatorBuild = await read('dist/index.html');
+  await writeFile(path.join(root,'consoles/example/console.json'),'{"description":"console"}');
+  build();
+  assert.notEqual(await read('dist/index.html'),emulatorBuild);
+  assert.equal(await read('dist/consoles/example/console.json'),'{"description":"console"}');
  } finally {
   const resolved=await realpath(root),parent=await realpath(tmpdir());
   if(path.dirname(resolved)!==parent || !path.basename(resolved).startsWith('emuconfig-build-')) throw new Error('Unsafe test cleanup path');

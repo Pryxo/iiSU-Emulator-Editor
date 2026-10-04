@@ -1,21 +1,33 @@
 # Configuration format
 
-The editor accepts one file, emuladores.json, with an object containing a consoles array. A renamed .json copy with the same structure is also accepted. Unversioned files and version 1 are supported; an explicitly incompatible version or schemaVersion is rejected.
+The editor accepts one JSON file containing a `consoles` array. Unversioned files and version 1 are supported; an incompatible `version` or `schemaVersion` is rejected.
 
-## emuladores.json
+## Console and emulator data
 
-Each console has a unique `shortName`, a `longName`, and an `emulators` array. Other fields such as `manufacturer`, `romExtensions`, dates, and achievement IDs are preserved. Each emulator has a unique case-insensitive `id` within its console, a `name`, `routeType`, and non-empty `commands`. Commands contain a unique `description` plus a `command` string. Optional `packages` is a string array. Existing route strings are accepted; the editor does not execute or validate Android intents.
+Each console has a unique `shortName`, a `longName`, and an `emulators` array. Console short names match ignoring capitalization and surrounding spaces. Other fields such as `manufacturer`, `romExtensions`, dates, and achievement IDs are retained unless you replace the whole console. Each emulator has a unique case-insensitive `id` within its console, a `name`, `routeType`, and non-empty `commands`. Commands contain a unique `description` and a `command` string. Optional `packages` is a string array. The editor does not execute or validate Android intents.
 
-## Merge and undo
+## Console header actions
 
-Full console definitions can create missing platforms with their metadata and all emulators in one action. Console short names match ignoring capitalization and surrounding spaces. If a console already exists, its metadata is preserved and only its emulators are merged. Repeated adds do not create duplicates. New consoles appear as complete objects in the Changes dialog, including empty consoles. Undoing their addition removes the new console; removing the last emulator alone keeps it.
+Database consoles live in `consoles/<id>/console.json` and are registered in `consoles/index.json`. Each definition contains a `description` and a complete `console` object. Console templates appear in the database and console filter even when missing from your configuration.
 
-New single-emulator mappings append to an existing console. Existing entries retain unknown keys and unrelated commands. Commands match by description; package arrays are unioned. The info button shows the database description, when available, above read-only JSON for the emulator. Descriptions are not included in the exported catalog. The original catalog is never mutated. Undo rebuilds the current catalog from the original and remaining actions.
+The header's + adds a missing console, or offers to replace an existing console with the complete database template. Replacement changes all metadata and the emulator array: fields and emulators omitted from the template are removed. You must confirm replacement. The config header's minus removes the whole console and all its emulators after confirmation. Both actions can be undone. The header's info button previews the complete console JSON for that side of the editor.
 
-The minus button removes an emulator from that console. Other emulator entries and unrelated settings are preserved. The Changes dialog shows additions, modifications, and removals and supports Undo all.
+Console additions, removals, and metadata changes appear as full objects in the Changes dialog, including empty consoles. Emulator-only changes are shown individually. Matching `shortName` values never create duplicate consoles.
 
-Download JSON saves the edited catalog directly under the uploaded filename. An unchanged download retains the exact source text. Edited JSON uses detected indentation, line endings, and BOM. Downloads use Blob/object URLs and run entirely in the browser. The File panel provides original and modified JSON previews, download, and replacement.
+## Emulator row actions
+
+Emulator packages live in `emulators/<id>/emulator.json` and are registered in `emulators/index.json`. Each definition contains a `description` and an `entries` array of `{ shortName, emulator }` mappings. See the [contribution guide](adding-emulators.html) for examples and legacy support.
+
+Add the console first, then use the emulator row's + to add or update that emulator. Updating an existing emulator requires confirmation. Existing entries retain unknown keys and unrelated commands. Commands match by description and package arrays are combined without duplicates. Emulator actions preserve console metadata and other emulators. The row's minus removes only that emulator; an empty console remains.
+
+The row's info button shows only the emulator JSON. Database info panels also show the corresponding console or emulator description. Your config's panels show its JSON without database descriptions. Descriptions are not exported.
+
+## Undo and download
+
+The original catalog is never mutated. Undo rebuilds the current catalog from the original and remaining actions. Undo all restores the original file, including consoles and emulators removed by replacements.
+
+Download JSON saves the edited catalog under the uploaded filename. An unchanged download retains the exact source text. Edited JSON uses detected indentation, line endings, and BOM. Downloads use Blob/object URLs and run entirely in the browser. The File panel provides original and modified JSON previews, download, and replacement.
 
 ## Privacy and security
 
-File contents never enter network requests, URLs, cookies, or browser storage. All UI text is rendered safely as text nodes. Commands are data, never executed. Only packaged assets and registry JSON are fetched, before editing. Closing or refreshing clears private session state. The app rejects files over 10 MB, invalid JSON, duplicate object keys, malformed emulator structures, duplicate IDs, and integer values that JavaScript cannot preserve exactly.
+File contents never enter network requests, URLs, cookies, or browser storage. All UI text is rendered as text nodes. Commands are data, never executed. Only packaged assets and registry JSON are fetched. Closing or refreshing clears private session state. The app rejects files over 10 MB, invalid JSON, duplicate object keys, malformed structures, duplicate IDs, and integer values that JavaScript cannot preserve exactly.

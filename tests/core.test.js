@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import {readConfig} from '../js/config-loader.js';
 import {validateConfig} from '../js/config-validator.js';
 import {validateDefinition} from '../js/emulator-loader.js';
-import {clone,planChange,planRemoval,applyPlan,rebuild,changesBetween} from '../js/config-merger.js';
+import {clone,planChange,planRemoval,planConsoleChange,planConsoleRemoval,applyPlan,rebuild,changesBetween} from '../js/config-merger.js';
+import {validateConsoleDefinition} from '../js/console-loader.js';
 import {serializeConfig} from '../js/download.js';
 import {createFixtures} from './fixtures.js';
 const {singleDefinition, fullDefinition} = createFixtures();
@@ -103,28 +104,88 @@ test('full console addition preserves metadata, exports complete JSON and undoes
  assert.deepEqual(applyPlan(next,action),next);
 });
 
-test('existing console is reused across casing and whitespace and keeps all its settings',()=>{
+test('whole console replacement matches casing and whitespace and replaces incorrect settings',()=>{
  const original=fixture();original.consoles.push({shortName:' SaMpLe-CoNsOlE ',longName:'My games',manufacturer:'Mine',romExtensions:['.custom'],custom:42,emulators:[]});
  const action=planChange(original,fullDefinition,'sample-console'),next=applyPlan(original,action);
  assert.equal(next.consoles.length,original.consoles.length);
- assert.deepEqual(next.consoles.at(-1),{...original.consoles.at(-1),emulators:fullDefinition.entries[0].emulators});
+ assert.equal(action.needsConfirmation,true);
+ assert.deepEqual(next.consoles.at(-1),fullDefinition.entries[0]);
+ assert.deepEqual(action.beforeConsole,original.consoles.at(-1));
+ assert.deepEqual(rebuild(original,[]),original);
  assert.equal(changesBetween(original,next).length,1);
  assert.equal(planChange(next,fullDefinition,'SAMPLE-CONSOLE').entryChanged,false);
  // A plan made while the console was absent must also reuse it when applied later.
  assert.deepEqual(applyPlan(original,planChange(fixture(),fullDefinition,'sample-console')),next);
 });
 
-test('console merge adds all missing emulators and confirms changes to existing commands',()=>{
+test('console replacement is exact and removes stale fields and extra emulators',()=>{
  const definition=clone(fullDefinition);definition.entries[0].emulators.push({...clone(payload),id:'SECOND'});
  const original=applyPlan(fixture(),planChange(fixture(),fullDefinition,'sample-console'));
  const c=original.consoles.at(-1);c.emulators[0].commands[0].command='custom';c.emulators[0].packages.push('local.package');c.emulators[0].extra=true;
  c.emulators.push({...clone(payload),id:'LOCAL'});
  const snapshot=clone(original),plan=planChange(original,definition,'sample-console');assert.equal(plan.needsConfirmation,true);
  const next=applyPlan(original,plan),updated=next.consoles.at(-1);
- assert.equal(updated.emulators.length,3);assert.equal(updated.emulators[0].extra,true);
- assert.ok(updated.emulators[0].packages.includes('local.package'));
+ assert.equal(updated.emulators.length,2);assert.equal(updated.emulators[0].extra,undefined);
+ assert.ok(!updated.emulators[0].packages.includes('local.package'));
+ assert.deepEqual(updated,definition.entries[0]);
  assert.equal(updated.emulators[0].commands[0].command,fullDefinition.entries[0].emulators[0].commands[0].command);
  assert.deepEqual(original,snapshot);assert.deepEqual(applyPlan(next,plan),next);
+});
+
+test('separate console template can replace metadata, add an emulator, remove everything and undo each step',()=>{
+ const {consoleDefinition,consoleEmulatorDefinition}=createFixtures();
+ validateConsoleDefinition(consoleDefinition,'sample-console');
+ const original={rootSetting:42,consoles:[{shortName:'SAMPLE-CONSOLE',longName:'Wrong',romExtensions:['.wrong'],obsolete:true,emulators:[clone(payload)]},...fixture().consoles]};
+ const snapshot=clone(original),replace=planConsoleChange(original,consoleDefinition.console);
+ assert.equal(replace.needsConfirmation,true);
+ const replaced=applyPlan(original,replace);
+ assert.equal(replaced.consoles.length,original.consoles.length);
+ assert.deepEqual(replaced.consoles[0],consoleDefinition.console);
+ assert.deepEqual(replaced.consoles.slice(1),original.consoles.slice(1));
+ assert.deepEqual(changesBetween(original,replaced),[{shortName:'sample-console',title:'Sample Console (console)',before:original.consoles[0],after:replaced.consoles[0]}]);
+ const add=planChange(replaced,consoleEmulatorDefinition,'sample-console'),added=applyPlan(replaced,add);
+ assert.deepEqual(added.consoles[0].emulators,[consoleEmulatorDefinition.entries[0].emulator]);
+ const remove=planConsoleRemoval(added,' SAMPLE-CONSOLE '),removed=applyPlan(added,remove);
+ assert.deepEqual(removed,{rootSetting:42,consoles:original.consoles.slice(1)});
+ assert.deepEqual(changesBetween(original,removed),[{shortName:'SAMPLE-CONSOLE',title:'Wrong (console)',before:original.consoles[0],after:undefined}]);
+ assert.deepEqual(rebuild(original,[replace,add,remove]),removed);
+ assert.deepEqual(rebuild(original,[replace,add]),added);
+ assert.deepEqual(rebuild(original,[replace]),replaced);
+ assert.deepEqual(rebuild(original,[]),snapshot);
+ assert.deepEqual(original,snapshot);
+ assert.throws(()=>planConsoleRemoval(removed,'sample-console'),/no longer/);
+});
+
+test('new console add/remove returns to unchanged and metadata-only replacements are tracked',()=>{
+ const {consoleDefinition}=createFixtures(),original=fixture();
+ const add=planConsoleChange(original,consoleDefinition.console),added=applyPlan(original,add);
+ const removed=applyPlan(added,planConsoleRemoval(added,'sample-console'));
+ assert.deepEqual(removed,original);assert.deepEqual(changesBetween(original,removed),[]);
+ const corrected=clone(added.consoles.at(-1));corrected.manufacturer='Corrected';
+ const changed=applyPlan(added,planConsoleChange(added,corrected));
+ assert.equal(changesBetween(added,changed).length,1);
+ assert.deepEqual(changesBetween(added,changed)[0].after,corrected);
+});
+
+test('separate console definitions validate and descriptions stay outside exported data',()=>{
+ const {consoleDefinition}=createFixtures();
+ for(const definition of [null,{}, {...consoleDefinition,description:7},{...consoleDefinition,console:{shortName:'broken'}}]) assert.throws(()=>validateConsoleDefinition(definition,'bad'));
+ const modified=applyPlan({consoles:[]},planConsoleChange({consoles:[]},consoleDefinition.console));
+ assert.equal(Object.hasOwn(modified.consoles[0],'description'),false);
+});
+
+test('console registry rejects duplicate identities, reports malformed templates and retains valid ones',async t=>{
+ const {consoleDefinition}=createFixtures();const requests=[];
+ const registry={schemaVersion:1,consoles:['first','duplicate','broken'].map(id=>({id,path:id+'/console.json'}))};
+ t.mock.method(globalThis,'fetch',async(url,options)=>{
+  requests.push({url:new URL(url),options});
+  const id=url.pathname.split('/').at(-2);
+  return {ok:true,json:async()=>url.pathname.endsWith('/index.json') ? registry : id==='broken' ? {description:'Broken',console:{shortName:'broken'}} : id==='duplicate' ? {...consoleDefinition,console:{...consoleDefinition.console,shortName:' SAMPLE-CONSOLE '}} : consoleDefinition};
+ });
+ const {loadConsoles}=await import('../js/console-loader.js?v=console-test');
+ const result=await loadConsoles();assert.deepEqual(result.definitions,[consoleDefinition]);
+ assert.equal(result.errors.length,2);assert.ok(result.errors.some(error=>error.includes('Duplicate console')));
+ for(const request of requests){assert.equal(request.url.search,'?v=console-test');assert.equal(request.options.cache,'no-cache');}
 });
 
 test('empty consoles and removal of the last emulator remain visible as console changes',()=>{

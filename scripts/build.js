@@ -12,7 +12,7 @@ async function sourceFiles(directory) {
   }));
   return files.flat().sort();
 }
-const versionFiles = ['index.html', ...await sourceFiles('js'), ...await sourceFiles('css'), ...await sourceFiles('emulators')];
+const versionFiles = ['index.html', ...await sourceFiles('js'), ...await sourceFiles('css'), ...await sourceFiles('emulators'), ...await sourceFiles('consoles')];
 const hash = createHash('sha256');
 for (const file of versionFiles) hash.update(file.replaceAll(path.sep,'/')).update('\0').update(await readFile(file)).update('\0');
 const version = hash.digest('hex').slice(0,16);
@@ -22,14 +22,16 @@ await mkdir('dist',{recursive:true});
 const workspace = await realpath('.');
 const output = await realpath('dist');
 if (!output.startsWith(workspace + path.sep)) throw new Error('Build output must stay inside the workspace.');
-const emulatorOutput = path.join(output,'emulators');
-try {
-  const resolved = await realpath(emulatorOutput);
-  if (!resolved.startsWith(output + path.sep)) throw new Error('Emulator output must stay inside dist.');
-  await rm(emulatorOutput,{recursive:true,force:true});
-} catch(error) { if(error.code !== 'ENOENT') throw error; }
+for (const directory of ['emulators','consoles']) {
+  const catalogOutput = path.join(output,directory);
+  try {
+    const resolved = await realpath(catalogOutput);
+    if (!resolved.startsWith(output + path.sep)) throw new Error('Catalog output must stay inside dist.');
+    await rm(catalogOutput,{recursive:true,force:true});
+  } catch(error) { if(error.code !== 'ENOENT') throw error; }
+}
 for(const name of ['index.html','LICENSE']) await copyFile(name,`dist/${name}`);
-for(const name of ['assets','css','js','emulators','docs']) await cp(name,`dist/${name}`,{recursive:true});
+for(const name of ['assets','css','js','emulators','consoles','docs']) await cp(name,`dist/${name}`,{recursive:true});
 for (const file of await sourceFiles('dist/js')) {
   if (!file.endsWith('.js')) continue;
   const source = await readFile(file,'utf8');

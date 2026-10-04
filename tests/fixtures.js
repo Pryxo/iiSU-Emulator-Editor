@@ -16,7 +16,11 @@ export function createFixtures() {
     {shortName: 'sample-platform', longName: 'Sample Platform', customConsole: 42, emulators: []},
     {shortName: 'other', longName: 'Other', emulators: []}
   ]};
-  const definitions = new Map([['sample-emulator', singleDefinition], ['sample-console', fullDefinition]]);
+  const consoleDefinition = {description:'Sample console description',console:{...structuredClone(fullDefinition.entries[0]),emulators:[]}};
+  const consoleEmulatorDefinition = {description:'Independent console emulator description',entries:[{shortName:'sample-console',emulator:structuredClone(fullDefinition.entries[0].emulators[0])}]};
+  const consoleDefinitions = new Map([['sample-console',consoleDefinition]]);
+  const consoleRegistry = {schemaVersion:1,consoles:[{id:'sample-console',path:'sample-console/console.json'}]};
+  const definitions = new Map([['sample-emulator', singleDefinition], ['sample-console', consoleEmulatorDefinition]]);
   const registry = {schemaVersion: 1, emulators: [...definitions.keys()].map(id => ({id, path: `${id}/emulator.json`}))};
-  return {singleDefinition, fullDefinition, catalog, definitions, registry};
+  return {singleDefinition, fullDefinition, consoleDefinition, consoleEmulatorDefinition, consoleDefinitions, consoleRegistry, catalog, definitions, registry};
 }

@@ -1,0 +1,18 @@
+{
+  "description": "JoiPlay platform for .jp and .joiplay shortcut files. Add this console, then add the JoiPlay emulator below. Replacing the console resets its metadata and removes its current emulators.",
+  "console": {
+    "shortName": "joiplay",
+    "longName": "JoiPlay",
+    "releaseYear": "2019",
+    "releaseDate": "2019-12-16",
+    "manufacturer": "JoiPlay",
+    "retroAchievementsId": "NA",
+    "romExtensions": [
+      ".jp",
+      ".JP",
+      ".joiplay",
+      ".JOIPLAY"
+    ],
+    "emulators": []
+  }
+}

@@ -15,33 +15,29 @@ export function mergeEntry(existing, incoming) {
   if (existing.packages || incoming.packages) result.packages = [...new Set([...(existing.packages || []), ...(incoming.packages || [])])];
   return result;
 }
-export function planChange(catalog, definition, shortName) {
-  const mapping = definition.entries.find(e => consoleKey(e.shortName) === consoleKey(shortName));
+export function planChange(catalog, definition, shortName, emulatorId) {
+  const mapping = definition.entries.find(e => consoleKey(e.shortName) === consoleKey(shortName) &&
+    (!emulatorId || (!isConsoleEntry(e) && e.emulator.id.toLowerCase() === emulatorId.toLowerCase())));
   const consoleEntry = catalog.consoles.find(c => consoleKey(c.shortName) === consoleKey(shortName));
   if (mapping && isConsoleEntry(mapping)) {
-    validateConfig({consoles:[mapping]});
-    const after = mergeConsole(consoleEntry, mapping);
-    return {kind:'console', shortName:consoleEntry?.shortName || mapping.shortName, platform:after.longName,
-      consoleEntry:clone(mapping), entryChanged:!equal(consoleEntry,after),
-      needsConfirmation:!!consoleEntry && mapping.emulators.some(incoming => {
-        const old = consoleEntry.emulators.find(e => e.id.toLowerCase() === incoming.id.toLowerCase());
-        return old && !equal(old,mergeEntry(old,incoming));
-      })};
+    return planConsoleChange(catalog, mapping);
   }
   if (!mapping || !consoleEntry) throw new Error('This console is not present in your catalog.');
   const oldEntry = consoleEntry.emulators.find(e => e.id.toLowerCase() === mapping.emulator.id.toLowerCase());
   const newEntry = mergeEntry(oldEntry, mapping.emulator);
   return {shortName, platform: consoleEntry.longName, beforeEntry: clone(oldEntry), afterEntry: newEntry, entryChanged: !equal(oldEntry, newEntry), needsConfirmation: !!oldEntry && !equal(oldEntry, newEntry)};
 }
-function mergeConsole(existing, incoming) {
-  if (!existing) return clone(incoming);
-  const result = clone(existing);
-  for (const emulator of incoming.emulators) {
-    const index = result.emulators.findIndex(e => e.id.toLowerCase() === emulator.id.toLowerCase());
-    if (index < 0) result.emulators.push(clone(emulator));
-    else result.emulators[index] = mergeEntry(result.emulators[index], emulator);
-  }
-  return result;
+export function planConsoleChange(catalog, incoming) {
+  validateConfig({consoles:[incoming]});
+  const existing = catalog.consoles.find(c => consoleKey(c.shortName) === consoleKey(incoming.shortName));
+  return {kind:'console',shortName:incoming.shortName,platform:incoming.longName,
+    consoleEntry:clone(incoming),beforeConsole:clone(existing),entryChanged:!equal(existing,incoming),
+    needsConfirmation:!!existing && !equal(existing,incoming)};
+}
+export function planConsoleRemoval(catalog, shortName) {
+  const existing = catalog.consoles.find(c => consoleKey(c.shortName) === consoleKey(shortName));
+  if (!existing) throw new Error('This console is no longer in your configuration.');
+  return {kind:'remove-console',shortName:existing.shortName,platform:existing.longName,beforeConsole:clone(existing)};
 }
 export function applyPlan(catalog, plan) {
   const next = clone(catalog);
@@ -49,13 +45,18 @@ export function applyPlan(catalog, plan) {
   if (plan.kind === 'console') {
     validateConfig({consoles:[plan.consoleEntry]});
     if (consoleKey(plan.consoleEntry.shortName) !== consoleKey(plan.shortName)) throw new Error('Console identity does not match the selected console.');
-    const merged = mergeConsole(c, plan.consoleEntry);
-    if (c) next.consoles[next.consoles.indexOf(c)] = merged;
-    else next.consoles.push(merged);
+    // Replacing means using the complete supplied object, including its emulator list.
+    if (c) next.consoles[next.consoles.indexOf(c)] = clone(plan.consoleEntry);
+    else next.consoles.push(clone(plan.consoleEntry));
     validateConfig(next);
     return next;
   }
   if (!c) throw new Error('The selected console is missing. Reload your configuration file.');
+  if (plan.kind === 'remove-console') {
+    next.consoles.splice(next.consoles.indexOf(c),1);
+    validateConfig(next);
+    return next;
+  }
   if (plan.kind === 'remove') {
     c.emulators = c.emulators.filter(e => e.id.toLowerCase() !== plan.emulatorId.toLowerCase());
     validateConfig(next);
@@ -77,8 +78,9 @@ export function changesBetween(original, modified) {
   const changes = [];
   for (const c of modified.consoles) {
     const before = original.consoles.find(item => consoleKey(item.shortName) === consoleKey(c.shortName));
-    if (!before) {
-      changes.push({shortName:c.shortName, title:c.longName + ' (console)', before:undefined, after:c});
+    const metadata = ({emulators,...fields}) => fields;
+    if (!before || !equal(metadata(before),metadata(c))) {
+      changes.push({shortName:c.shortName, title:c.longName + ' (console)', before, after:c});
       continue;
     }
     for (const e of c.emulators) {
@@ -87,6 +89,11 @@ export function changesBetween(original, modified) {
     }
     for (const e of before?.emulators || []) {
       if (!c.emulators.some(item => item.id.toLowerCase() === e.id.toLowerCase())) changes.push({shortName:c.shortName, title:e.name, before:e, after:undefined});
+    }
+  }
+  for (const c of original.consoles) {
+    if (!modified.consoles.some(item => consoleKey(item.shortName) === consoleKey(c.shortName))) {
+      changes.push({shortName:c.shortName,title:c.longName + ' (console)',before:c,after:undefined});
     }
   }
   return changes;

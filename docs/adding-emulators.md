@@ -1,42 +1,63 @@
-# Add an emulator
+# Add consoles and emulators
 
-1. Create `emulators/<emulator-id>/` using lowercase kebab-case. One emulator per directory.
-2. Add `emulator.json` with a `description` and an `entries` array. Copy the Eden Duo definition as a starting point.
-3. Register `{ "id": "your-id", "path": "your-id/emulator.json" }` in `emulators/index.json`.
-4. Run `npm test`, `npm run build`, and `npm start`. Test at `/emuconfig/`, including adding, removing, and the info panel.
+Console headers and emulator rows have independent definitions and descriptions. Use the matching JoiPlay files as examples.
 
-## Definition
+## Folder structure
 
-`description` is the text shown above the emulator JSON in the info panel. It is displayed for database entries and matching entries in your uploaded configuration. It is not added to the exported configuration.
+```text
+consoles/
+  index.json
+  joiplay/
+    console.json
+emulators/
+  index.json
+  joiplay/
+    emulator.json
+```
 
-`entries` contains `{ shortName, emulator }` objects. The console short name chooses where to add the emulator. Console names come from the uploaded configuration when the console already exists. Each emulator object retains its required `id`, `name`, `routeType`, non-empty `commands` (each with `description` and `command`), and optional `packages`. Copy launch commands accurately.
+Edit [consoles/joiplay/console.json](../consoles/joiplay/console.json) for the platform metadata and the description shown by the console header's info button. Edit [emulators/joiplay/emulator.json](../emulators/joiplay/emulator.json) for the launch command, packages, and the emulator row's description. Descriptions appear only in database info panels and are never exported to the user's configuration.
 
-No per-emulator README, icon, status, provenance, outer name, outer ID, or schema version is required. Keep any useful emulator notes in the description. The registry supplies the package identity.
+## Add a console
 
-Adding an emulator copies its complete payload, including all commands and packages, into emuladores.json. The editor updates one console per action. One package can have multiple console mappings, with unique console short names. IDs must be unique in the registry. Register custom additions rather than duplicating entries already present in the normal catalog. The database count shows distinct emulator packages, not mapping rows.
-
-No central JavaScript list needs editing. An invalid definition produces a readable error while the remaining definitions continue to load. Add tests if the contribution changes merge behavior.
-
-## Add a whole console
-
-An item in `entries` can also be a complete console object with `shortName`, `longName`, and an `emulators` array. Paste your console object here, including metadata such as `romExtensions`, `manufacturer`, and release dates. See [JoiPlay](../emulators/joiplay/emulator.json) for a complete example.
+1. Create `consoles/<console-id>/console.json` using lowercase kebab-case for the folder name.
+2. Give it a `description` and a `console` object, as shown below.
+3. Register `{ "id": "your-console", "path": "your-console/console.json" }` in the `consoles` array in `consoles/index.json`. Keep the registry's `schemaVersion` at 1.
 
 ```json
 {
-  "description": "My platform and its emulators",
-  "entries": [
-    {
-      "shortName": "my-platform",
-      "longName": "My Platform",
-      "romExtensions": [".rom"],
-      "emulators": []
-    }
-  ]
+  "description": "Notes about this platform and its file extensions.",
+  "console": {
+    "shortName": "my-platform",
+    "longName": "My Platform",
+    "manufacturer": "Example",
+    "romExtensions": [".rom"],
+    "emulators": []
+  }
 }
 ```
 
-Register the file in `emulators/index.json` as usual. Full console entries appear in the database and console filter even when absent from the uploaded file. Click + on the console row to add the entire object and all its emulators. The info button previews the complete console JSON.
+The console object requires `shortName`, `longName`, and an `emulators` array. Add other iiSU metadata such as release dates and achievement IDs as needed. Usually leave `emulators` empty so users can add their preferred emulators separately. A template may include default emulators; the entire array is applied when the console is added or replaced. The header's info button shows exactly that full template. The config header's info button shows the full current console, including all installed emulator entries.
 
-Console identity uses `shortName`, ignoring capitalization and surrounding spaces. If the console already exists, the editor keeps its name, metadata, ROM extensions, and other settings, and merges the supplied emulators by ID. Existing commands that would change require confirmation. Repeated additions do not duplicate consoles or emulators. Undo reverses the entire add action, including a newly created console.
+The database header's + button adds a missing console. For an existing console it offers to replace the entire object, including metadata and all current emulators, with this template. Fields and emulator entries absent from the template are removed. Replacement requires confirmation and can be undone. An identical template shows a disabled checkmark. Console matching ignores capitalization and surrounding spaces in `shortName`, preventing duplicate platforms.
 
-Do not mix `emulator` and `emulators` in the same entry. A definition may mix legacy emulator mappings and full console entries for different consoles; console short names must remain unique within it. Empty emulator arrays are allowed. Removing a console's last emulator keeps the console; undo the original console addition to remove that new console entirely.
+The config header's minus button removes the whole console and all its emulator entries after confirmation. Undo restores everything. Every uploaded console supports this removal and info action, even without a database template.
+
+## Add an emulator
+
+1. Create `emulators/<emulator-id>/emulator.json` using lowercase kebab-case. One emulator package per directory.
+2. Add a `description` and an `entries` array of `{ shortName, emulator }` objects. Copy an existing emulator file as a starting point.
+3. Register `{ "id": "your-emulator", "path": "your-emulator/emulator.json" }` in `emulators/index.json`.
+
+Each mapping's `shortName` selects its console. An emulator requires `id`, `name`, `routeType`, non-empty `commands` (each with `description` and `command`), and optional `packages`. Copy launch commands accurately. One package may map to several consoles; short names must be unique within a definition. Registry IDs and console template short names must also be unique.
+
+Emulator rows remain visible under a missing platform, but their + buttons are disabled until its console is added. Adding or updating an individual emulator preserves console metadata and other emulator entries. Existing emulator IDs match without case sensitivity; commands merge by description and packages are combined without duplicates. Updates to an existing emulator require confirmation. The emulator info button shows only that emulator's JSON. Removing its last emulator keeps the console.
+
+The database count shows distinct visible emulator packages, excluding console templates. No central JavaScript list, per-emulator README, icon, outer name, outer ID, or schema version is required for a definition.
+
+## Existing combined definitions
+
+Older complete-console objects inside an emulator file's `entries` still load. They appear as console header controls and individual emulator rows. Their console action now replaces the whole console after confirmation. To edit descriptions independently, move the full console into a separate console definition and leave `{ shortName, emulator }` mappings in the emulator file. A separately registered console template takes precedence over a legacy template for the same short name.
+
+## Check your addition
+
+Run `npm test`, `npm run build`, and `npm start`. Open `/emuconfig/` and check adding, replacing, removing, undoing, and both info panels. Tests discover both registries automatically. Invalid definitions show an error while valid definitions continue to load. Keep personal configuration files out of contributions.
