@@ -4,6 +4,10 @@
     {
       "id": "joiplay",
       "path": "joiplay/console.json"
+    },
+    {
+      "id": "moonlight",
+      "path": "moonlight/console.json"
     }
   ]
 }

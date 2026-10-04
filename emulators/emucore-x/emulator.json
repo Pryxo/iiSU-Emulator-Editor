@@ -2,7 +2,7 @@
   "description": "EmuCoreX made by sashkinbro, https://github.com/sashkinbro/EmuCoreX | JSON Source by Pryxo | Not tested yet",
   "entries": [
     {
-      "shortName": "EmuCoreX",
+      "shortName": "ps2",
       "emulator": {
         "id": "EMUCOREX",
         "name": "EmuCoreX (Standalone)",
