@@ -18,6 +18,10 @@ Contributions are welcome through pull requests:
 
 See the [contribution guide](docs/adding-emulators.md) and [JSON format reference](docs/json-format.md) for details. Keep personal configuration files out of pull requests.
 
+## Credits
+
+[Font](https://puzzylpiece.xyz/consolesans/). Made by PuzzylPiece
+
 ## License
 
 [MIT](LICENSE). Emulator names belong to their respective projects; no affiliation is implied.
