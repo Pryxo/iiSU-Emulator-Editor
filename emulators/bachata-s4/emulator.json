@@ -1,6 +1,6 @@
 {
   "description": "Bachata S4 made by JICA98, https://github.com/JICA98/Bachata-S4 | JSON Source by Pryxo | Not tested yet\nIn your ps4 folder for iiSU, create a file named WhatEverGameName.ps4 with the title ID/CUSA ID in it \"CUSA00900\" as a example",
-  "status": 1, 
+  "status": 2, 
   "entries": [
     {
       "shortName": "ps4",
@@ -11,11 +11,11 @@
         "commands": [
           {
             "description": "Bachata S4 Game Serial",
-            "command": "com.bachatas4.android.github/com.bachatas4.android.DirectLaunchActivity -e game_id %ROM_CONTENT%"
+            "command": "com.bachatas4.android.github/com.bachatas4.android.DirectLaunchActivity --es game_id %ROM_CONTENT%"
           },
           {
             "description": "Bachata S4 Game Serial Play Store",
-            "command": "com.bachatas4.android/com.bachatas4.android.DirectLaunchActivity -e game_id %ROM_CONTENT%"
+            "command": "com.bachatas4.android/com.bachatas4.android.DirectLaunchActivity --es game_id %ROM_CONTENT%"
           }
         ],
         "packages": [
