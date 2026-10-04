@@ -15,9 +15,10 @@ export function validateDefinition(definition, id) {
   }
   return definition;
 }
-async function getJSON(url) { const response = await fetch(url); if (!response.ok) throw new Error(`Could not load ${url.pathname} (${response.status}).`); return response.json(); }
+async function getJSON(url) { const response = await fetch(url, {cache:'no-cache'}); if (!response.ok) throw new Error(`Could not load ${url.pathname} (${response.status}).`); return response.json(); }
 export async function loadEmulators() {
   const base = new URL('../emulators/index.json', import.meta.url);
+  base.search = new URL(import.meta.url).search;
   const registry = await getJSON(base);
   if (registry.schemaVersion !== 1 || !Array.isArray(registry.emulators)) throw new Error('Unsupported emulator registry version.');
   const ids = new Set();
@@ -25,6 +26,7 @@ export async function loadEmulators() {
     if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(item.id) || item.path !== `${item.id}/emulator.json` || ids.has(item.id)) throw new Error('Invalid or duplicate registry entry.');
     ids.add(item.id);
     const url = new URL(item.path, base);
+    url.search = base.search;
     return validateDefinition(await getJSON(url), item.id);
   }));
   return {definitions: results.filter(r => r.status === 'fulfilled').map(r => r.value), errors: results.filter(r => r.status === 'rejected').map(r => r.reason.message)};

@@ -150,13 +150,17 @@ try {
  await page.locator('#accept-confirm').click();
  await page.locator('#preview-dialog').waitFor({state:'hidden'});
  assert.equal(await page.locator('#workspace-status').textContent(),'No changes');
- await page.route('**/eden-duo/emulator.json',route=>route.fulfill({json:{description:'Invalid entry',entries:[]}}));
+ await page.route('**/eden-duo/emulator.json*',route=>route.fulfill({json:{description:'Invalid entry',entries:[]}}));
  await page.reload();await page.locator('#file-input').setInputFiles(inputFile);
  await page.locator('#library-error').waitFor();
  assert.equal(await page.locator('#database-list .emulator-row').count(),1);
  assert.equal(await page.locator('.row-icon, .emulator-row img').count(),0);
  assert.deepEqual(errors,[]);
  assert.ok(requests.every(r=>r.method==='GET'&&!r.body&&r.url.startsWith('http://127.0.0.1:4173/')));
+ const assetRequests=requests.map(r=>new URL(r.url)).filter(url=>/\.(js|css|json)$/.test(url.pathname));
+ const assetVersion=assetRequests.find(url=>url.pathname.endsWith('/js/app.js')).searchParams.get('v');
+ assert.match(assetVersion,/^[a-f0-9]{16}$/);
+ assert.ok(assetRequests.every(url=>url.searchParams.get('v')===assetVersion));
  await writeFile('.qa/eden-duo-results.json',JSON.stringify({passed:true,errors,checks:['custom-only database','exact Eden Duo payload','single-file upload','invalid JSON','platform filter','read-only info','offline add','duplicate detection','exact JSON export','invalid replacement','cancel replacement','remove','undo','search','file preview','mobile','keyboard','reduced motion','refresh clearing','drag/drop','invalid definition handling','no uploads']},null,2));
  console.log('Eden Duo and full console browser checks passed.');
 }finally{await browser.close();}

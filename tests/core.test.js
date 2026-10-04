@@ -18,6 +18,19 @@ test('registered definitions validate and preserve registry-folder identity',asy
  for(const entry of registry.emulators){const data=JSON.parse(await readFile(new URL(`../emulators/${entry.path}`,import.meta.url)));validateDefinition(data,entry.id);assert.equal(entry.path,`${entry.id}/emulator.json`);}
 });
 
+test('catalog fetches revalidate caches and inherit the deployed module version',async t=>{
+ const requests=[];
+ t.mock.method(globalThis,'fetch',async(url,options)=>{
+  requests.push({url:new URL(url),options});
+  return {ok:true,json:async()=>url.pathname.endsWith('/index.json') ? {schemaVersion:1,emulators:[{id:'joiplay',path:'joiplay/emulator.json'}]} : joi};
+ });
+ const {loadEmulators}=await import('../js/emulator-loader.js?v=deployment-test');
+ const result=await loadEmulators();
+ assert.deepEqual(result.errors,[]);assert.deepEqual(result.definitions,[joi]);
+ assert.equal(requests.length,2);
+ for(const request of requests){assert.equal(request.url.search,'?v=deployment-test');assert.equal(request.options.cache,'no-cache');}
+});
+
 test('add changes only the chosen emulator array and never mutates the input',()=>{
  const original=fixture(),snapshot=clone(original),modified=applyPlan(original,planChange(original,eden,'switch'));
  const expected=clone(original);expected.consoles[0].emulators.push(payload);
