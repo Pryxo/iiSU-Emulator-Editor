@@ -1,0 +1,22 @@
+{
+  "description": "EmuCoreX made by sashkinbro, https://github.com/sashkinbro/EmuCoreX | JSON Source by Pryxo | Not tested yet",
+  "entries": [
+    {
+      "shortName": "EmuCoreX",
+      "emulator": {
+        "id": "EMUCOREX",
+        "name": "EmuCoreX (Standalone)",
+        "routeType": "fileContent",
+        "commands": [
+          {
+            "description": "EmuCore X",
+            "command": "com.sbro.emucorex/com.sbro.emucorex.MainActivity -a com.sbro.emucorex.action.LAUNCH_GAME -d \"%ROM_URI%\""
+          }
+        ],
+        "packages": [
+          "com.sbro.emucorex"
+        ]
+      }
+    }
+  ]
+}
