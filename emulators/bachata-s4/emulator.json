@@ -1,6 +1,6 @@
 {
   "description": "Bachata S4 made by JICA98, https://github.com/JICA98/Bachata-S4 | JSON Source by Pryxo | Not tested yet\nIn your ps4 folder for iiSU, create a file named WhatEverGameName.ps4 with the title ID/CUSA ID in it \"CUSA00900\" as a example",
-  "status": 0, 
+  "status": 2, 
   "entries": [
     {
       "shortName": "ps4",
