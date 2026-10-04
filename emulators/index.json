@@ -24,6 +24,10 @@
     {
       "id": "bachata-s4",
       "path": "bachata-s4/emulator.json"
+    },
+    {
+      "id": "kirin",
+      "path": "kirin/emulator.json"
     }
   ]
 }

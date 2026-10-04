@@ -12,6 +12,10 @@
     {
       "id": "ps4",
       "path": "ps4/console.json"
+    },
+    {
+      "id": "kirin",
+      "path": "kirin/console.json"
     }
   ]
 }

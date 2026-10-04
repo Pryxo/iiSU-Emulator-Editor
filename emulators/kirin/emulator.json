@@ -1,0 +1,23 @@
+{
+  "description": "Kirin by Kirin, https://www.playkirin.com/en/ | JSON by Pryxo",
+  "status": 1, 
+  "entries": [
+    {
+      "shortName": "kirin",
+      "emulator": {
+        "id": "KIRIN",
+        "name": "Kirin (Standalone)",
+        "routeType": "fileContent",
+        "commands": [
+          {
+            "description": "Kirin",
+            "command": "com.gmax.kirin/com.gmax.kirin.LibraryActivity -a com.gmax.kirin.action.LAUNCH_GAME_SHORTCUT -e shortcut_game_path \"%ROM_CONTENT%\""
+          }
+        ],
+        "packages": [
+          "com.gmax.kirin"
+        ]
+      }
+    }
+  ]
+}

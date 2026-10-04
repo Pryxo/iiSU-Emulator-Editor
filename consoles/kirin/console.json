@@ -1,0 +1,16 @@
+{
+  "description": "Kirin platform for .kirin and .Kirin files",
+  "console": {
+    "shortName": "kirin",
+    "longName": "Kirin",
+    "releaseYear": "2026",
+    "releaseDate": "2026-06-27",
+    "manufacturer": "Kirin",
+    "retroAchievementsId": "NA",
+    "romExtensions": [
+      ".kirin",
+      ".KIRIN"
+    ],
+    "emulators": []
+  }
+}
