@@ -8,25 +8,91 @@ Emulators are grouped by platform. The editor preserves unrelated settings and s
 
 ## Contribute platforms and emulators
 
-Contributions are welcome through pull requests:
+Contributions are welcome through pull requests. Fork this repository and create a branch for your addition. Platforms are called **consoles** in the JSON files; their `shortName` connects a platform to its emulator mappings.
 
-1. Fork this repository and create a branch for your addition.
-2. Create `emulators/<emulator-id>/emulator.json` with a description and an `entries` array. Each entry maps a platform's `shortName` to an emulator definition, including its launch commands and any package names. To add another platform for an existing emulator, extend its `entries` array. For a platform template, create `consoles/<console-id>/console.json` with its own `description` and a complete `console` object. Usually leave its `emulators` array empty so emulators can be added separately.
-3. Register emulator files in `emulators/index.json` and console files in `consoles/index.json`. Use lowercase kebab-case for directory and registry IDs, and match platform short names to those used by iiSU.
-4. With Node.js 22 or later, run `npm test` and `npm run build`. Run `npm start` and open `http://127.0.0.1:4173/emuconfig/` to check your addition in the editor.
-5. Open a pull request describing the platform and emulator, linking to the emulator's project, and explaining how you tested the launch commands. Mention any commands you could not test on a device.
+### Add a platform
+
+1. Create `consoles/<console-id>/console.json`. Use [JoiPlay's console template](consoles/joiplay/console.json) as a reference.
+2. Include a `description` and a complete `console` object with `shortName`, `longName`, and an `emulators` array. Add appropriate metadata such as `manufacturer` and `romExtensions`. Usually leave `emulators` empty so users can choose emulators separately.
+3. Add an entry to the `consoles` array in [consoles/index.json](consoles/index.json), keeping `schemaVersion` at `1`:
+
+   ```json
+   { "id": "my-platform", "path": "my-platform/console.json" }
+   ```
+
+A console template adds a missing platform or replaces an existing platform's entire object after confirmation. Include all intended metadata: replacement removes fields and emulators absent from the template.
+
+### Add an emulator
+
+1. Create `emulators/<emulator-id>/emulator.json`. Use [Eden Duo's emulator definition](emulators/eden-duo/emulator.json) or [JoiPlay's emulator definition](emulators/joiplay/emulator.json) as a reference.
+2. Include a `description` and a non-empty `entries` array. Each entry has a platform `shortName` and an `emulator` object with `id`, `name`, `routeType`, and non-empty `commands`. Each command needs `description` and `command`; optional `packages` is an array of Android package names.
+3. Add an entry to the `emulators` array in [emulators/index.json](emulators/index.json), keeping `schemaVersion` at `1`:
+
+   ```json
+   { "id": "my-emulator", "path": "my-emulator/emulator.json" }
+   ```
+
+For another platform supported by an existing emulator, extend that definition's `entries` array instead of creating a second directory. Each platform `shortName` must be unique within the definition. The platform must exist in the loaded configuration before an emulator can be added; contribute a console template too if users need a way to add it.
+
+Use lowercase kebab-case for directory and registry IDs, and make each registry path match its directory exactly. Match platform short names to those used by iiSU. Descriptions appear in database info panels and are not exported. No central JavaScript list needs updating.
+
+### Check and submit your contribution
+
+With Node.js 22 or later, run these commands from the repository root. The core tests and build require no dependency installation.
+
+```sh
+npm test
+npm run build
+npm start
+```
+
+Open [the local editor](http://127.0.0.1:4173/emuconfig/) and load a test configuration. Check the new entry's info panel, adding, replacing or updating, removing, undoing, and downloading the result. For a new platform, a file containing `{"consoles":[]}` lets you test adding its template before its emulators. `npm start` serves `dist/`; rerun `npm run build` after source or catalog changes and refresh the browser.
+
+Open a pull request describing the addition, linking to the emulator's project, and listing the checks you ran. Test launch commands on a device with iiSU and state which emulator version you used. Mention any commands you could not verify: the editor treats commands as data and does not execute or validate Android intents.
 
 See the [contribution guide](docs/adding-emulators.md) and [JSON format reference](docs/json-format.md) for details. Keep personal configuration files out of pull requests.
 
 ## Tests
 
-`npm test` runs the core behavior checks, build checks, and a catalog check that discovers every definition through `emulators/index.json` and `consoles/index.json`. New or renamed emulators and consoles require no changes to test code. The catalog check validates each definition and checks that every mapping can be added without changing the input or creating duplicates.
+### Core, catalog, and build checks
 
-Core and browser behavior tests use fictional data from `tests/fixtures.js`. These examples cover single-emulator mappings and complete console entries independently of the real catalog. Tests are excluded from the deployed website.
+```sh
+npm test
+```
 
-For browser checks, install Playwright locally with `npm install --no-save --package-lock=false playwright` and install its browser with `npx playwright install chromium`, then run `npm run test:browser`. This builds the site, starts a temporary local server on an available port, and closes it afterward. Screenshots and exported test files go in `.qa/`.
+This runs the Node.js test suite:
 
-Optional environment variables: `BROWSER_CHANNEL` selects an installed browser such as `msedge` or `chrome`; `BASE_URL` uses an existing built-site server; `PLAYWRIGHT_PATH` points to an existing Playwright module entry file. The browser checks supply their own fictional catalog and never need a personal configuration file.
+| Test file | Coverage |
+| --- | --- |
+| [tests/core.test.js](tests/core.test.js) | Configuration validation, emulator merging, complete console replacement, removal, undo, and JSON export formatting. |
+| [tests/catalog.test.js](tests/catalog.test.js) | Loads every registered emulator and console through the production loaders; checks emulator mappings can be applied without mutating the input or adding duplicates, and console templates replace existing platforms exactly. |
+| [tests/build.test.js](tests/build.test.js) | Builds a temporary fixture site and checks asset versioning, reproducible output, and version changes after catalog edits. |
+
+Catalog checks discover definitions through `emulators/index.json` and `consoles/index.json`, so registered additions and renames need no test-code changes. Unregistered files are not checked or shown in the editor. These checks validate structure and editor behavior; they do not prove an emulator can launch a game.
+
+Run `npm run build` to build the actual site into `dist/`. The GitHub Pages deployment workflow runs `npm test` and `npm run build` before deployment; browser checks are a separate local step.
+
+### Browser checks
+
+Install Playwright locally and its Chromium browser, then run:
+
+```sh
+npm install --no-save --package-lock=false playwright
+npx playwright install chromium
+npm run test:browser
+```
+
+[tests/browser.mjs](tests/browser.mjs) builds on the real app with a fictional catalog from [tests/fixtures.js](tests/fixtures.js). It checks uploads, platform filtering, info panels, add/update/remove actions, confirmations, undo, downloads, mobile layouts, keyboard interactions, and that file contents are not uploaded. Core behavior tests use the same fixtures, independently of the real catalog. No personal configuration file is needed, and tests are excluded from the deployed website.
+
+`npm run test:browser` builds the site, starts a temporary local server on an available port, and closes it afterward. Screenshots, exported test files, and `browser-results.json` go in the ignored `.qa/` directory. Because browser checks substitute a fictional catalog, also check your real catalog addition manually using the local editor.
+
+Optional environment variables:
+
+| Variable | Purpose |
+| --- | --- |
+| `BROWSER_CHANNEL` | Use an installed browser such as `msedge` or `chrome` instead of Playwright's Chromium. |
+| `BASE_URL` | Test an existing built-site server instead of starting a temporary server, for example `http://127.0.0.1:4173/emuconfig/`. |
+| `PLAYWRIGHT_PATH` | Use an existing Playwright installation by specifying its module entry file. |
 
 ## Credits
 
