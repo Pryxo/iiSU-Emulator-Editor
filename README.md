@@ -48,7 +48,7 @@ npm run build
 npm start
 ```
 
-Open [the local editor](http://127.0.0.1:4173/emuconfig/) and load a test configuration. Check the new entry's info panel, adding, replacing or updating, removing, undoing, and downloading the result. For a new platform, a file containing `{"consoles":[]}` lets you test adding its template before its emulators. `npm start` serves `dist/`; rerun `npm run build` after source or catalog changes and refresh the browser.
+Open [the local editor](http://127.0.0.1:4173/iisu-emulator-editor/) and load a test configuration. Check the new entry's info panel, adding, replacing or updating, removing, undoing, and downloading the result. For a new platform, a file containing `{"consoles":[]}` lets you test adding its template before its emulators. `npm start` serves `dist/`; rerun `npm run build` after source or catalog changes and refresh the browser.
 
 Open a pull request describing the addition, linking to the emulator's project, and listing the checks you ran. Test launch commands on a device with iiSU and state which emulator version you used. Mention any commands you could not verify: the editor treats commands as data and does not execute or validate Android intents.
 

@@ -60,4 +60,4 @@ Older complete-console objects inside an emulator file's `entries` still load. T
 
 ## Check your addition
 
-Run `npm test`, `npm run build`, and `npm start`. Open `/emuconfig/` and check adding, replacing, removing, undoing, and both info panels. Tests discover both registries automatically. Invalid definitions show an error while valid definitions continue to load. Keep personal configuration files out of contributions.
+Run `npm test`, `npm run build`, and `npm start`. Open `/iisu-emulator-editor/` and check adding, replacing, removing, undoing, and both info panels. Tests discover both registries automatically. Invalid definitions show an error while valid definitions continue to load. Keep personal configuration files out of contributions.

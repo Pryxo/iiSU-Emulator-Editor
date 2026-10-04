@@ -6,7 +6,7 @@ import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 
 test('deployment versions the full module graph and changes URLs after catalog edits',async()=>{
- const root=await mkdtemp(path.join(tmpdir(),'emuconfig-build-'));
+ const root=await mkdtemp(path.join(tmpdir(),'iisu-emulator-editor-build-'));
  try {
   for(const dir of ['scripts','js','css','emulators/example','consoles/example','assets','docs']) await mkdir(path.join(root,dir),{recursive:true});
   await copyFile(new URL('../scripts/build.js',import.meta.url),path.join(root,'scripts/build.js'));
@@ -38,7 +38,7 @@ test('deployment versions the full module graph and changes URLs after catalog e
   assert.equal(await read('dist/consoles/example/console.json'),'{"description":"console"}');
  } finally {
   const resolved=await realpath(root),parent=await realpath(tmpdir());
-  if(path.dirname(resolved)!==parent || !path.basename(resolved).startsWith('emuconfig-build-')) throw new Error('Unsafe test cleanup path');
+  if(path.dirname(resolved)!==parent || !path.basename(resolved).startsWith('iisu-emulator-editor-build-')) throw new Error('Unsafe test cleanup path');
   await rm(resolved,{recursive:true,force:true});
  }
 });
