@@ -4,7 +4,7 @@ import {loadEmulators} from './emulator-loader.js';
 import {createPlatformFilter} from './platform-filter.js';
 import {clone, equal, planChange, planRemoval, applyPlan, rebuild, changesBetween} from './config-merger.js';
 import {downloadJSON} from './download.js';
-import {$, el, button, toast, showError, jsonViewer, diffView, openPreview, setupDialogs, confirmAction, safeLink} from './ui.js';
+import {$, el, button, toast, showError, jsonViewer, diffView, openPreview, setupDialogs, confirmAction, safeLink, descriptionView} from './ui.js';
 
 const state = {
   file:null, original:null, modified:null,
@@ -213,7 +213,7 @@ function showDetail(consoleEntry, emulator, definition, isDatabase) {
   detailReturnFocus = {side:isDatabase ? 'database' : 'config',shortName:consoleEntry.shortName,id:emulator.id};
   $('#detail-title').textContent = emulator.name.replace(/\s*\(Standalone\)/g,'');
   const content = [];
-  if (definition?.description.trim()) content.push(el('p','detail-description',definition.description));
+  if (definition?.description.trim()) content.push(descriptionView(definition.description));
   content.push(jsonViewer(emulator,'Emulator entry'));
   $('#detail-content').replaceChildren(...content);
   $('#detail-dialog').showModal();

@@ -44,5 +44,23 @@ export function confirmAction(title, message, accept = 'Apply changes') {
   });
 }
 export function safeLink(label, href) {
-  try { const url = new URL(href); if (url.protocol !== 'https:') return null; const a = el('a','',label); a.href = url.href; a.target = '_blank'; a.rel = 'noopener noreferrer'; return a; } catch { return null; }
+  try { const url = new URL(href); if (!['https:', 'http:'].includes(url.protocol)) return null; const a = el('a','',label); a.href = url.href; a.target = '_blank'; a.rel = 'noopener noreferrer'; return a; } catch { return null; }
+}
+export function descriptionView(text) {
+  const description = el('p', 'detail-description');
+  let last = 0;
+  for (const match of text.matchAll(/\bhttps?:\/\/[^\s<>"']+/gi)) {
+    let href = match[0].replace(/[.,;:!?]+$/, '');
+    // Leave sentence punctuation and unmatched closing brackets outside the link.
+    while (/[)\]}]$/.test(href)) {
+      const close = href.at(-1), open = {')':'(', ']':'[', '}':'{'}[close];
+      if (href.split(close).length <= href.split(open).length) break;
+      href = href.slice(0, -1).replace(/[.,;:!?]+$/, '');
+    }
+    description.append(document.createTextNode(text.slice(last, match.index)));
+    description.append(safeLink(href, href) || document.createTextNode(href));
+    last = match.index + href.length;
+  }
+  description.append(document.createTextNode(text.slice(last)));
+  return description;
 }

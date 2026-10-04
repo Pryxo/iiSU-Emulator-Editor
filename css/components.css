@@ -48,3 +48,5 @@ select option { background: #22212b; color: #f0eff7; }
 .panel-heading h2{flex-wrap:wrap;column-gap:10px;row-gap:3px}
 
 .detail-description{font-size:.9rem;line-height:1.65;color:#c6bfd4;white-space:pre-wrap;overflow-wrap:anywhere;margin-bottom:20px}
+.detail-description a{color:var(--blue);text-decoration:underline;text-underline-offset:3px}
+.detail-description a:hover{color:var(--text)}
