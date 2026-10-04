@@ -12,6 +12,14 @@
     {
       "id": "vita3k-plus",
       "path": "vita3k-plus/emulator.json"
+    },
+    {
+      "id": "moonlight",
+      "path": "moonlight/emulator.json"
+    },
+    {
+      "id": "emucore-x",
+      "path": "emucore-x/emulator.json"
     }
   ]
 }
