@@ -1,0 +1,22 @@
+{
+  "description": "Vita3K-Plus made by nckstwrt, https://github.com/nckstwrt/Vita3K-Plus/ | JSON Source by rhodynit",
+  "entries": [
+    {
+      "shortName": "psvita",
+      "emulator": {
+        "id": "VITA3K+",
+        "name": "Vita3K+ (Standalone)",
+        "routeType": "fileContent",
+        "commands": [
+          {
+            "description": "Vita3K+",
+            "command": "org.vita3kplus.emulator/org.vita3k.emulator.Emulator --esa \"AppStartParameters\" \"-r\",\"%ROM_CONTENT%\""
+          }
+        ],
+        "packages": [
+          "org.vita3kplus.emulator"
+        ]
+      }
+    }
+  ]
+}

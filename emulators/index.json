@@ -8,6 +8,10 @@
     {
       "id": "joiplay",
       "path": "joiplay/emulator.json"
+    },
+    {
+      "id": "vita3k-plus",
+      "path": "vita3k-plus/emulator.json"
     }
   ]
 }
