@@ -1,5 +1,6 @@
 import {SETTINGS} from './settings.js';
 import {readConfig} from './config-loader.js';
+import {saveSession, restoreSession} from './session.js';
 import {loadEmulators, isConsoleEntry} from './emulator-loader.js';
 import {consoleKey} from './config-validator.js';
 import {loadConsoles} from './console-loader.js';
@@ -15,6 +16,7 @@ const state = {
 let detailReturnFocus;
 const platformFilter = createPlatformFilter($('#platform-filter'), value => {
   state.platform = value;
+  persistSession();
   renderLists();
   $('#database-list').scrollTop = 0;
   $('#config-list').scrollTop = 0;
@@ -85,6 +87,7 @@ async function loadFile(files) {
     state.platform = 'all';
     state.search = '';
     $('#search').value = '';
+    persistSession();
     renderPlatforms();
     if (state.original) {
       for (const dialog of document.querySelectorAll('dialog[open]')) dialog.close();
@@ -120,7 +123,7 @@ function renderPlatforms() {
   const options = availableConsoles()
     .sort((a,b) => a.longName.localeCompare(b.longName))
     .map(c => ({value:c.shortName, label:c.longName}));
-  if (state.platform !== 'all') state.platform = options.find(option => consoleKey(option.value) === consoleKey(state.platform))?.value || 'all';
+  if (state.platform !== 'all') state.platform = options.find(option => consoleKey(option.value) === consoleKey(state.platform))?.value || (state.libraryLoading ? state.platform : 'all');
   platformFilter.setOptions([{value:'all',label:'All consoles'}, ...options],state.platform);
 }
 function matches(consoleEntry, emulator) {
@@ -264,6 +267,7 @@ function commit(plan) {
   state.actions.push(plan);
   state.modified = modified;
   state.changes = changesBetween(state.original,modified);
+  persistSession();
   render();
 }
 function undo() {
@@ -271,6 +275,7 @@ function undo() {
   state.actions.pop();
   state.modified = rebuild(state.original,state.actions);
   state.changes = changesBetween(state.original,state.modified);
+  persistSession();
   render();
   toast('Change undone');
 }
@@ -307,6 +312,7 @@ function previewChanges() {
   if (state.actions.length) controls.append(button('Undo all',async () => {
     if (!await confirmAction('Undo all changes?','Restore the file you loaded.','Undo all')) return;
     state.actions = []; state.modified = clone(state.original); state.changes = [];
+    persistSession();
     render(); $('#preview-dialog').close(); toast('Changes cleared');
   }));
   const diffs = state.changes.map(change => diffView(change.before,change.after,state.file.name + ' · ' + change.title));
@@ -340,8 +346,18 @@ function render() {
 let searchTimer;
 $('#search').addEventListener('input',event => {
   clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => { state.search = event.target.value.trim().toLowerCase(); renderLists(); },100);
+  state.search = event.target.value.trim().toLowerCase();
+  searchTimer = setTimeout(() => { persistSession(); renderLists(); },100);
 });
+function persistSession() {
+  try {
+    saveSession(state);
+    showError('#session-warning', '');
+  } catch {
+    showError('#session-warning', 'Your browser could not keep this session. Download your JSON before leaving or refreshing the editor.');
+  }
+}
+window.addEventListener('pagehide', persistSession);
 $('#nav-editor').addEventListener('click',() => $('#search').focus());
 $('#nav-changes').addEventListener('click',previewChanges);
 $('#nav-file').addEventListener('click',showFile);
@@ -370,4 +386,16 @@ async function loadLibrary() {
     $('#library-error').append(button('Retry',loadLibrary));
   } finally { state.libraryLoading = false; render(); }
 }
+state.loading = true;
+render();
+try {
+  const saved = await restoreSession();
+  if (saved) {
+    Object.assign(state, saved);
+    $('#search').value = state.search;
+  }
+} catch {
+  toast('The previous session could not be restored. Please upload your JSON again.', true);
+}
+state.loading = false;
 render(); loadLibrary();

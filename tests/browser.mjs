@@ -25,7 +25,7 @@ browser=await chromium.launch({headless:true, ...(process.env.BROWSER_CHANNEL ? 
 const context=await browser.newContext({viewport:{width:1440,height:960},acceptDownloads:true});
 const page=await context.newPage(),errors=[],requests=[];
 page.on('pageerror',error=>errors.push(error.message));
-page.on('request',request=>requests.push({url:request.url(),method:request.method(),body:request.postData()}));
+page.on('request',request=>requests.push({url:request.url(),method:request.method(),body:request.postData(),referer:request.headers().referer}));
 await mkdir('.qa',{recursive:true});
 const {singleDefinition: definition, fullDefinition, consoleDefinition, consoleEmulatorDefinition, consoleRegistry, consoleDefinitions, catalog: original, registry, definitions} = createFixtures();
 const mapping = definition.entries[0];
@@ -108,6 +108,25 @@ await page.route('**/consoles/**', route => {
  assert.equal(await databaseRow.locator('.added').isDisabled(),true);
  assert.equal(await page.locator('#workspace-status').textContent(),'1 change');
  await context.setOffline(false);
+ // The documentation return link creates a fresh editor document in the same tab.
+ await page.locator('#search').fill(payload.name.toLowerCase());
+ await page.getByRole('link',{name:'Documentation',exact:true}).click();
+ await page.getByRole('link',{name:'← Back to iiSU Emulator Editor'}).click();
+ await configRow.waitFor();
+ assert.equal(await page.locator('#workspace-status').textContent(),'1 change');
+ assert.equal(await page.locator('#search').inputValue(),payload.name.toLowerCase());
+ assert.equal(await page.locator('.platform-label').textContent(),platform.longName);
+ await page.reload();await configRow.waitFor();
+ await page.locator('#undo').click();
+ assert.equal(await configRow.count(),0);
+ assert.equal(await page.locator('#workspace-status').textContent(),'No changes');
+ await databaseRow.locator('.add').click();await configRow.waitFor();
+ await page.locator('#search').fill('');
+ // A separately opened tab has its own session, even in the same browser context.
+ const freshTab=await context.newPage();await freshTab.goto(baseURL);
+ await freshTab.locator('#upload-zone:not(:disabled)').waitFor();
+ assert.equal(await freshTab.locator('#workspace').isVisible(),false);
+ await freshTab.close();
  await configRow.locator('.info').click();
  assert.deepEqual(JSON.parse(await page.locator('#detail-content pre').first().textContent()),payload);
  assert.equal(await page.locator('#detail-content pre').count(),1);
@@ -161,7 +180,7 @@ await page.route('**/consoles/**', route => {
  assert.equal(await databaseRow.locator('.info').evaluate(e=>e===document.activeElement),true);
  await page.emulateMedia({reducedMotion:'reduce'});
  assert.equal(await page.locator('#download-config').evaluate(e=>getComputedStyle(e).animationName),'none');
- await page.reload();assert.equal(await page.locator('#workspace').isVisible(),false);
+ await page.reload();await page.locator('#workspace').waitFor();
  const drop=await page.evaluateHandle(()=>{const dt=new DataTransfer();dt.items.add(new File(['{"consoles":[]}'],'emuladores.json',{type:'application/json'}));return dt;});
  await page.locator('#upload-zone').dispatchEvent('drop',{dataTransfer:drop});
  await page.locator('#workspace').waitFor();
@@ -248,7 +267,8 @@ await page.route('**/consoles/**', route => {
  assert.equal(await page.locator('.row-icon, .emulator-row img').count(),0);
  assert.deepEqual(errors,[]);
  assert.ok(requests.every(r=>r.method==='GET'&&!r.body&&new URL(r.url).origin===new URL(baseURL).origin));
- const assetRequests=requests.map(r=>new URL(r.url)).filter(url=>/\.(js|css|json)$/.test(url.pathname));
+ // Documentation styles are served separately from the editor's versioned assets.
+ const assetRequests=requests.filter(r=>!new URL(r.referer || baseURL).pathname.includes('/docs/')).map(r=>new URL(r.url)).filter(url=>/\.(js|css|json)$/.test(url.pathname));
  const assetVersion=assetRequests.find(url=>url.pathname.endsWith('/js/app.js')).searchParams.get('v');
  assert.match(assetVersion,/^[a-f0-9]{16}$/);
  assert.ok(assetRequests.every(url=>url.searchParams.get('v')===assetVersion));
@@ -265,7 +285,17 @@ await page.route('**/consoles/**', route => {
  await row('database',consoleEmulator.id).locator('.add').click();await row('config',consoleEmulator.id).waitFor();
  assert.equal(await page.locator('#config-count').textContent(),'2');
  assert.deepEqual(errors,[]);
- await writeFile('.qa/browser-results.json',JSON.stringify({passed:true,errors,checks:['custom-only database','exact emulator payload','single-file upload','invalid JSON','platform filter','read-only info','offline add','duplicate detection','exact JSON export','invalid replacement','cancel replacement','remove','undo','search','file preview','mobile','keyboard','reduced motion','refresh clearing','drag/drop','invalid definition handling','no uploads']},null,2));
+ // Storage restrictions must warn without preventing editing or downloads.
+ const blockedTab=await context.newPage();
+ await blockedTab.addInitScript(()=>{Storage.prototype.setItem=()=>{throw new DOMException('Full','QuotaExceededError');};});
+ await blockedTab.goto(baseURL);
+ await blockedTab.locator('#upload-zone:not(:disabled)').waitFor();
+ await blockedTab.locator('#file-input').setInputFiles(inputFile);
+ await blockedTab.locator('#workspace').waitFor();
+ await blockedTab.locator('#session-warning').filter({hasText:'Download your JSON'}).waitFor();
+ assert.equal(await blockedTab.locator('#download-config').isEnabled(),true);
+ await blockedTab.close();
+ await writeFile('.qa/browser-results.json',JSON.stringify({passed:true,errors,checks:['custom-only database','exact emulator payload','single-file upload','invalid JSON','platform filter','read-only info','offline add','duplicate detection','exact JSON export','invalid replacement','cancel replacement','remove','undo','search','file preview','mobile','keyboard','reduced motion','documentation return and refresh persistence','restored undo history','separate tab isolation','storage failure warning','drag/drop','invalid definition handling','no uploads']},null,2));
  console.log('Sample emulator and full console browser checks passed.');
 }finally{await browser?.close();server?.kill();}
 

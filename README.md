@@ -2,7 +2,7 @@
 
 [Open the editor](https://pryxo.github.io/iiSU-Emulator-Editor/)
 
-A browser-based editor for iiSU's `emuladores.json`. Load your configuration, browse the emulator library, add or remove emulators, and download the edited file. Files stay in your browser and are not uploaded to a server.
+A browser-based editor for iiSU's `emuladores.json`. Load your configuration, browse the emulator library, add or remove emulators, and download the edited file. Files stay in your browser and are not uploaded to a server. Your file, pending edits, undo history, and filters survive visits to the Info page and refreshes in the same tab. They are kept in tab session storage, which normally clears when you close the tab (browser session restore may recover it).
 
 Emulators are grouped by platform. The editor preserves unrelated settings and supports undoing changes. Platform mappings use the console's `shortName`. Console headers can add, replace, or remove a whole platform. Emulator rows edit individual emulators. Console replacement applies the complete template after confirmation; emulator edits preserve platform settings. All actions support undo.
 
