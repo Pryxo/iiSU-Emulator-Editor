@@ -72,28 +72,6 @@ Catalog checks discover definitions through `emulators/index.json` and `consoles
 
 Run `npm run build` to build the actual site into `dist/`. The GitHub Pages deployment workflow runs `npm test` and `npm run build` before deployment; browser checks are a separate local step.
 
-### Browser checks
-
-Install Playwright locally and its Chromium browser, then run:
-
-```sh
-npm install --no-save --package-lock=false playwright
-npx playwright install chromium
-npm run test:browser
-```
-
-[tests/browser.mjs](tests/browser.mjs) builds on the real app with a fictional catalog from [tests/fixtures.js](tests/fixtures.js). It checks uploads, platform filtering, info panels, add/update/remove actions, confirmations, undo, downloads, mobile layouts, keyboard interactions, and that file contents are not uploaded. Core behavior tests use the same fixtures, independently of the real catalog. No personal configuration file is needed, and tests are excluded from the deployed website.
-
-`npm run test:browser` builds the site, starts a temporary local server on an available port, and closes it afterward. Screenshots, exported test files, and `browser-results.json` go in the ignored `.qa/` directory. Because browser checks substitute a fictional catalog, also check your real catalog addition manually using the local editor.
-
-Optional environment variables:
-
-| Variable | Purpose |
-| --- | --- |
-| `BROWSER_CHANNEL` | Use an installed browser such as `msedge` or `chrome` instead of Playwright's Chromium. |
-| `BASE_URL` | Test an existing built-site server instead of starting a temporary server, for example `http://127.0.0.1:4173/emuconfig/`. |
-| `PLAYWRIGHT_PATH` | Use an existing Playwright installation by specifying its module entry file. |
-
 ## Credits
 
 [Font](https://puzzylpiece.xyz/consolesans/). Made by PuzzylPiece
