@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "emulators": [
+    {
+      "id": "eden-duo",
+      "path": "eden-duo/emulator.json"
+    }
+  ]
+}

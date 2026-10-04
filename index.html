@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Edit your emulator configuration locally."><meta name="theme-color" content="#101017">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<title>EmuConfig</title><link rel="icon" href="./assets/icons/mark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="./css/main.css"><link rel="stylesheet" href="./css/components.css"><link rel="stylesheet" href="./css/responsive.css">
+<script type="module" src="./js/app.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to editor</a>
+<header class="topbar"><a class="wordmark" href="./"><img src="./assets/icons/mark.svg" width="30" height="30" alt=""><span data-brand>EmuConfig</span></a><span class="header-label">Emulator editor</span><a class="github-link" data-repository href="./docs/repository.html">GitHub ↗</a></header>
+<main id="main">
+<section id="upload-screen" aria-labelledby="upload-heading">
+  <div class="upload-wrap">
+    <button id="upload-zone" class="upload-zone" aria-labelledby="upload-heading" aria-describedby="upload-file">
+      <span class="upload-icon" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><path d="M24 31V10m-8 8 8-8 8 8M11 30v8h26v-8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <h1 id="upload-heading">Upload file</h1><p id="upload-file">emuladores.json</p><span class="upload-hint">Drop here or click to browse</span>
+    </button>
+    <div id="file-error" class="inline-error" role="alert" hidden></div>
+    <p class="privacy-note">Your file stays on your device.</p>
+  </div>
+</section>
+<section id="workspace" class="workspace" aria-label="Configuration editor" hidden>
+  <nav class="sidebar" aria-label="Editor navigation">
+    <button class="nav-button active" id="nav-editor" aria-label="Emulators" title="Emulators"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="7" height="7" rx="2"/><rect x="14" y="4" width="7" height="7" rx="2"/><rect x="3" y="15" width="7" height="5" rx="2"/><rect x="14" y="15" width="7" height="5" rx="2"/></svg></button>
+    <button class="nav-button" id="nav-changes" aria-label="Review changes" title="Changes"><svg viewBox="0 0 24 24"><path d="M8 5h12M8 12h12M8 19h12M3 5h.01M3 12h.01M3 19h.01"/></svg><span id="change-dot" hidden></span></button>
+    <button class="nav-button" id="nav-file" aria-label="Loaded file" title="File"><svg viewBox="0 0 24 24"><path d="M5 3h9l5 5v13H5zM14 3v6h5"/></svg></button>
+    <a class="nav-button nav-bottom" href="./docs/json-format.html" aria-label="Documentation" title="Documentation"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></svg></a>
+  </nav>
+  <div class="editor-body">
+    <div class="editor-toolbar"><label class="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></svg><input id="search" type="search" placeholder="Search emulators…" aria-label="Search emulators"></label><div id="platform-filter" class="platform-filter"><button type="button" class="platform-trigger" role="combobox" aria-label="Filter by console" aria-expanded="false" aria-haspopup="listbox" aria-controls="platform-menu"><span class="platform-label">All consoles</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button><div id="platform-menu" class="platform-menu" role="listbox" aria-label="Consoles" popover="auto"></div></div><button id="replace-file" class="text-button">Replace file</button></div>
+    <div id="workspace-error" class="inline-error" role="alert" hidden></div>
+    <div id="library-error" class="inline-error" role="alert" hidden></div>
+    <div class="split-view">
+      <section class="list-panel database-panel" aria-labelledby="database-heading"><header class="panel-heading"><h2 id="database-heading">Database <span id="database-count" class="count"></span></h2><span class="panel-mark blue" aria-hidden="true">↙</span></header><div id="database-list" class="panel-list" tabindex="0" aria-label="Available emulators"></div></section>
+      <section class="list-panel config-panel" aria-labelledby="config-heading"><header class="panel-heading"><h2 id="config-heading">Your config <span id="config-count" class="count"></span></h2><span class="panel-mark pink" aria-hidden="true">↗</span></header><div id="config-list" class="panel-list" tabindex="0" aria-label="Uploaded emulator configuration"></div></section>
+    </div>
+    <footer class="editor-footer"><span id="workspace-status" role="status">No changes</span><button id="undo" class="text-button" disabled>Undo</button><button id="download-config" class="button primary">Download JSON <span aria-hidden="true">↓</span></button></footer>
+  </div>
+</section>
+</main>
+<input id="file-input" class="visually-hidden" type="file" accept=".json,application/json" aria-label="Choose emuladores.json">
+<dialog id="detail-dialog" aria-labelledby="detail-title"><div class="dialog-top"><h2 id="detail-title">Emulator</h2><button class="icon-button" data-close aria-label="Close emulator details">×</button></div><div id="detail-content"></div></dialog>
+<dialog id="preview-dialog" class="wide-dialog" aria-labelledby="preview-title"><div class="dialog-top"><h2 id="preview-title">Changes</h2><button class="icon-button" data-close aria-label="Close preview">×</button></div><div id="preview-content"></div></dialog>
+<dialog id="confirm-dialog" aria-labelledby="confirm-title"><div class="dialog-top"><h2 id="confirm-title">Update settings?</h2><button class="icon-button" data-close aria-label="Cancel update">×</button></div><p id="confirm-message"></p><div class="confirm-actions"><button class="button secondary" id="cancel-confirm">Cancel</button><button class="button primary" id="accept-confirm">Apply</button></div></dialog>
+<div id="toasts" class="toasts" role="status" aria-live="polite" aria-atomic="true"></div>
+<noscript><p class="inline-error">Enable JavaScript to edit files locally.</p></noscript>
+</body>
+</html>

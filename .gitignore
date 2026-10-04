@@ -1,0 +1,5 @@
+node_modules/
+dist/
+.qa/
+emuladores.json
+emulator_options.json

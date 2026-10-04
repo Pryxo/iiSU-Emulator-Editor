@@ -1,0 +1,22 @@
+{
+  "description": "Eden Duo made by igawa6, https://github.com/igawa6/eden-duo",
+  "entries": [
+    {
+      "shortName": "switch",
+      "emulator": {
+        "id": "EDEN-DUO",
+        "name": "Eden Duo (Standalone)",
+        "routeType": "uri",
+        "commands": [
+          {
+            "description": "Eden Duo",
+            "command": "dev.igawa6.edenduo/org.yuzu.yuzu_emu.activities.EmulationActivity -a android.nfc.action.TECH_DISCOVERED -d %ROM_URI%"
+          }
+        ],
+        "packages": [
+          "dev.igawa6.edenduo"
+        ]
+      }
+    }
+  ]
+}
