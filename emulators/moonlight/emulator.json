@@ -8,13 +8,13 @@
         "name": "Moonlight (Standalone)",
         "routeType": "commandDefined",
         "commands": [
-            {
-                "description": "Moonlight Game",
-                "command": "%PACKAGE%/com.limelight.ShortcutTrampoline -a android.intent.action.VIEW -e Name "ComputerName" -e AppName "%ROM_CONTENT%""
-            }
+          {
+            "description": "Moonlight Game",
+            "command": "%PACKAGE%/com.limelight.ShortcutTrampoline -a android.intent.action.VIEW -e Name \"*ComputerName*\" -e AppName \"*%ROM_CONTENT%*\""
+          }
         ],
         "packages": [
-            "com.limelight"
+          "com.limelight"
         ]
       }
     }
