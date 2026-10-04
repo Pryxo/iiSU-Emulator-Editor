@@ -160,7 +160,7 @@ function renderRow(consoleEntry, emulator, definition, isDatabase) {
     const present = state.modified.consoles.some(c => consoleKey(c.shortName) === consoleKey(consoleEntry.shortName));
     const plan = present ? planChange(state.modified,definition,consoleEntry.shortName,emulator.id) : null;
     const exists = consoleEntry.emulators.some(e => e.id.toLowerCase() === emulator.id.toLowerCase());
-    const unchanged = plan && !plan.entryChanged;
+    const unchanged = plan?.exactMatch;
     const action = !present ? 'Add the console first: ' : unchanged ? 'Already added: ' : exists ? 'Update ' : 'Add ';
     const add = rowControl(unchanged ? '✓' : '+', action + emulator.name + ' · ' + consoleEntry.shortName,
       () => addEmulator(definition,consoleEntry.shortName,emulator.id), unchanged ? 'added' : 'add');
@@ -191,18 +191,18 @@ function renderConsoleHeader(consoleEntry, definition, isDatabase) {
   const controls = el('div','row-controls');
   if (isDatabase && definition) {
     const plan = planConsoleChange(state.modified,definition.console);
-    const label = !plan.entryChanged ? 'Already added console: ' : plan.beforeConsole ? 'Replace console: ' : 'Add console: ';
-    const add = rowControl(plan.entryChanged ? '+' : '✓',label + display.longName,async () => {
+    const label = plan.exactMatch ? 'Already added console: ' : plan.beforeConsole ? 'Replace console: ' : 'Add console: ';
+    const add = rowControl(plan.exactMatch ? '✓' : '+',label + display.longName,async () => {
       try {
         const current = planConsoleChange(state.modified,definition.console);
-        if (!current.entryChanged) return;
+        if (current.exactMatch) return;
         if (current.needsConfirmation && !await confirmAction('Replace ' + display.longName + '?',
           'Replace this entire console, including all metadata and its ' + current.beforeConsole.emulators.length + ' current emulator(s), with the database console shown in its info panel? The replacement contains ' + current.consoleEntry.emulators.length + ' emulator(s). You can add individual emulators afterward and undo this replacement.', 'Replace console')) return;
         commit(current); toast(current.beforeConsole ? 'Console replaced' : 'Console added');
         $('#database-list').focus({preventScroll:true});
       } catch(error) { toast(error.message,true); }
-    },plan.entryChanged ? 'add' : 'added');
-    add.disabled = !plan.entryChanged;
+    },plan.exactMatch ? 'added' : 'add');
+    add.disabled = plan.exactMatch;
     controls.append(add);
   } else if (!isDatabase) {
     controls.append(rowControl('−','Remove console: ' + display.longName,async () => {
@@ -284,6 +284,10 @@ async function applyWithConfirmation(plan) {
 async function addEmulator(definition, shortName, emulatorId) {
   try {
     const plan = planChange(state.modified,definition,shortName,emulatorId);
+    if (!plan.entryChanged && !plan.exactMatch) {
+      toast('Your entry differs from the database. Updating preserves your extra fields, commands, and packages.');
+      return;
+    }
     if (await applyWithConfirmation(plan)) toast('Emulator applied');
   } catch (error) { toast(error.message,true); }
 }

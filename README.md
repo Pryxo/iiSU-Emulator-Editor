@@ -6,6 +6,8 @@ A browser-based editor for iiSU's `emuladores.json`. Load your configuration, br
 
 Emulators are grouped by platform. The editor preserves unrelated settings and supports undoing changes. Platform mappings use the console's `shortName`. Console headers can add, replace, or remove a whole platform. Emulator rows edit individual emulators. Console replacement applies the complete template after confirmation; emulator edits preserve platform settings. All actions support undo.
 
+The database shows an “Already added” checkmark only when the entry matches your current config. Console checks ignore the `emulators` field and compare every other field; individual emulator checks compare the complete emulator entry. Any changed, missing, or extra field in that comparison prevents a match, including nested settings and array order. JSON formatting and object key order do not matter. Emulator updates preserve custom fields, extra commands, and packages, so an updated entry may still differ from the database.
+
 ## Contribute platforms and emulators
 
 Contributions are welcome through pull requests. Fork this repository and create a branch for your addition. Platforms are called **consoles** in the JSON files; their `shortName` connects a platform to its emulator mappings.

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readConfig} from '../js/config-loader.js';
 import {validateConfig} from '../js/config-validator.js';
 import {validateDefinition} from '../js/emulator-loader.js';
-import {clone,planChange,planRemoval,planConsoleChange,planConsoleRemoval,applyPlan,rebuild,changesBetween} from '../js/config-merger.js';
+import {clone,equal,planChange,planRemoval,planConsoleChange,planConsoleRemoval,applyPlan,rebuild,changesBetween} from '../js/config-merger.js';
 import {validateConsoleDefinition} from '../js/console-loader.js';
 import {serializeConfig} from '../js/download.js';
 import {createFixtures} from './fixtures.js';
@@ -44,6 +44,67 @@ test('duplicate add is a no-op; undo restores the original',()=>{
  const original=fixture(),action=planChange(original,singleDefinition,'sample-platform'),next=applyPlan(original,action);
  const duplicate=planChange(next,singleDefinition,'sample-platform');assert.equal(duplicate.entryChanged,false);assert.deepEqual(applyPlan(next,duplicate),next);
  assert.deepEqual(rebuild(original,[]),original);assert.deepEqual(rebuild(original,[action]),next);assert.throws(()=>planChange(original,singleDefinition,'missing'),/not present/);
+});
+
+test('exact match checks every emulator field, independently of merge results',()=>{
+ const check=entry=>{
+  const catalog=fixture();catalog.consoles[0].emulators=[entry];
+  return planChange(catalog,singleDefinition,'sample-platform');
+ };
+ assert.equal(check(clone(payload)).exactMatch,true);
+ assert.equal(planChange(fixture(),singleDefinition,'sample-platform').exactMatch,false);
+ for(const mutate of [
+  e=>e.name+=' ', e=>e.id=e.id.toLowerCase(), e=>e.routeType='other',
+  e=>e.commands[0].command+=' ', e=>e.commands[0].description+=' ',
+  e=>e.commands[0].extra=false, e=>e.commands.push({description:'Local',command:'local'}),
+  e=>e.packages.push('local.package'), e=>delete e.packages,
+  e=>e.extra=null, e=>e.extra={nested:[false,1,'1']}
+ ]) {
+  const entry=clone(payload);mutate(entry);
+  assert.equal(check(entry).exactMatch,false,JSON.stringify(entry));
+ }
+ const custom=clone(payload);custom.extra=true;
+ assert.equal(check(custom).entryChanged,false);
+ assert.equal(check(custom).exactMatch,false);
+ // Updating a known field must not hide a remaining custom-field difference.
+ custom.name='Old name';
+ assert.equal(check(check(custom).afterEntry).exactMatch,false);
+});
+
+test('JSON equality ignores object key order but preserves types and array order',()=>{
+ const reversed=value=>Array.isArray(value)?value.map(reversed):value && typeof value==='object'
+  ? Object.fromEntries(Object.entries(value).reverse().map(([key,item])=>[key,reversed(item)])):value;
+ assert.equal(equal(payload,reversed(payload)),true);
+ const original=fixture();original.consoles[0].emulators=[reversed(payload)];
+ assert.equal(planChange(original,singleDefinition,'sample-platform').exactMatch,true);
+ assert.equal(planChange(original,singleDefinition,'sample-platform').entryChanged,false);
+ for(const [a,b] of [[1,'1'],[false,0],[null,{}],[[],{}],[[1,2],[2,1]],[{a:null},{}],[{a:1},{b:1}]]) {
+  assert.equal(equal(a,b),false);
+ }
+ const {consoleDefinition}=createFixtures(),template=consoleDefinition.console;
+ const catalog={consoles:[reversed(template)]};
+ assert.equal(planConsoleChange(catalog,template).entryChanged,false);
+ for(const mutate of [c=>c.longName+=' ',c=>c.extra=true,c=>c.emulators.push(clone(payload)),c=>c.customMetadata.preserve=false]) {
+  const entry=clone(template);mutate(entry);
+  assert.equal(planConsoleChange({consoles:[entry]},template).entryChanged,true);
+ }
+});
+
+test('console added status ignores only emulators and compares all metadata exactly',()=>{
+ const {consoleDefinition}=createFixtures(),template=consoleDefinition.console;
+ const check=entry=>planConsoleChange({consoles:[entry]},template);
+ assert.equal(planConsoleChange({consoles:[]},template).exactMatch,false);
+ const entry=clone(template);entry.emulators=[clone(payload)];
+ assert.equal(check(entry).exactMatch,true);
+ entry.emulators[0].commands[0].command='custom';
+ assert.equal(check(entry).exactMatch,true);
+ // Full replacement planning still tracks the emulator list independently of status.
+ assert.equal(check(entry).entryChanged,true);
+ for(const mutate of [c=>c.longName+=' ',c=>delete c.manufacturer,c=>c.extra=true,c=>c.customMetadata.preserve=false,c=>c.romExtensions.push('.local')]) {
+  const different=clone(entry);mutate(different);
+  assert.equal(check(different).exactMatch,false);
+ }
+ assert.equal(check(Object.fromEntries(Object.entries(entry).reverse())).exactMatch,true);
 });
 
 test('undo retains remaining console changes',()=>{

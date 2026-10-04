@@ -52,7 +52,33 @@ await page.route('**/consoles/**', route => {
  await page.locator('#file-input').setInputFiles({name:'bad.json',mimeType:'application/json',buffer:Buffer.from('{no')});
  await page.locator('#file-error').filter({hasText:'Could not parse JSON'}).waitFor();
  assert.equal(await page.locator('#file-input').getAttribute('multiple'),null);
+ // Uploaded entries must match the complete database payload, not just its ID or merge result.
+ for(const [kind,mutate,exact] of [
+  ['exact',e=>e,true],
+  ['reordered keys',e=>Object.fromEntries(Object.entries(e).reverse()),true],
+  ['one changed command',e=>{e.commands[0].command+=' ';return e;},false],
+  ['extra field',e=>({...e,localSetting:true}),false],
+  ['extra command field',e=>{e.commands[0].localSetting=true;return e;},false],
+  ['extra package',e=>{e.packages.push('local.package');return e;},false],
+  ['missing field',e=>{delete e.packages;return e;},false]
+ ]) {
+  const catalog=structuredClone(original);
+  catalog.consoles[0].emulators=[mutate(structuredClone(payload))];
+  await page.locator('#file-input').setInputFiles({name:kind+'.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(catalog))});
+  await page.locator('#replace-file:not(:disabled)').waitFor();
+  const control=row('database',payload.id).locator(exact?'.added':'.add');
+  await control.waitFor();
+  assert.equal(await control.isDisabled(),exact,kind);
+  assert.equal(await row('database',payload.id).getByRole('button',{name:/Already added:/}).count(),exact?1:0,kind);
+  if(kind==='extra field') {
+   await control.click();
+   await page.locator('#toasts').filter({hasText:'Your entry differs from the database'}).waitFor();
+   assert.equal(await page.locator('#workspace-status').textContent(),'No changes');
+   assert.equal(await row('database',payload.id).locator('.added').count(),0);
+  }
+ }
  await page.locator('#file-input').setInputFiles(inputFile);
+ await row('config',payload.id).waitFor({state:'detached'});
  await page.locator('#workspace').waitFor();
  await page.locator('#database-list .emulator-row').first().waitFor();
  assert.equal(await page.locator('#database-count').textContent(),registry.emulators.length + ' emulators');
@@ -162,6 +188,7 @@ await page.route('**/consoles/**', route => {
  assert.equal(await databaseHeader.locator('.added').isDisabled(),true);
  assert.equal(await page.locator('#config-count').textContent(),'0');
  await emulatorRow.locator('.add').click();await row('config',consoleEmulator.id).waitFor();
+ assert.equal(await databaseHeader.locator('.added').isDisabled(),true);
  const addedConsole={...consoleDefinition.console,emulators:[consoleEmulator]};
  await configHeader.locator('.info').click();
  assert.deepEqual(JSON.parse(await page.locator('#detail-content pre').textContent()),addedConsole);
@@ -185,6 +212,7 @@ await page.route('**/consoles/**', route => {
  assert.equal(await row('config',consoleEmulator.id).count(),0);
  assert.equal(await page.locator('#workspace-status').textContent(),'No changes');
  await page.locator('#undo').click();await row('config',consoleEmulator.id).waitFor();
+ assert.equal(await databaseHeader.locator('.added').isDisabled(),true);
  await page.locator('#undo').click();assert.equal(await row('config',consoleEmulator.id).count(),0);
  await page.locator('#undo').click();assert.equal(await configHeader.count(),0);
  // Replace incorrect metadata and all current emulators, without duplicating a case variant.

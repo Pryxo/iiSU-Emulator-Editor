@@ -2,7 +2,15 @@
 import {validateConfig, consoleKey} from './config-validator.js';
 import {isConsoleEntry} from './emulator-loader.js';
 export const clone = value => structuredClone(value);
-export const equal = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+// Compare JSON data exactly, independent of object key order. Array order matters.
+export function equal(a, b) {
+  if (a === b) return true;
+  if (a === null || b === null || typeof a !== 'object' || typeof b !== 'object') return false;
+  if (Array.isArray(a) !== Array.isArray(b)) return false;
+  if (Array.isArray(a)) return a.length === b.length && a.every((value, index) => equal(value, b[index]));
+  const keys = Object.keys(a);
+  return keys.length === Object.keys(b).length && keys.every(key => Object.hasOwn(b, key) && equal(a[key], b[key]));
+}
 export function mergeEntry(existing, incoming) {
   if (!existing) return clone(incoming);
   const commands = clone(existing.commands);
@@ -25,12 +33,14 @@ export function planChange(catalog, definition, shortName, emulatorId) {
   if (!mapping || !consoleEntry) throw new Error('This console is not present in your catalog.');
   const oldEntry = consoleEntry.emulators.find(e => e.id.toLowerCase() === mapping.emulator.id.toLowerCase());
   const newEntry = mergeEntry(oldEntry, mapping.emulator);
-  return {shortName, platform: consoleEntry.longName, beforeEntry: clone(oldEntry), afterEntry: newEntry, entryChanged: !equal(oldEntry, newEntry), needsConfirmation: !!oldEntry && !equal(oldEntry, newEntry)};
+  return {shortName, platform: consoleEntry.longName, beforeEntry: clone(oldEntry), afterEntry: newEntry, exactMatch: equal(oldEntry, mapping.emulator), entryChanged: !equal(oldEntry, newEntry), needsConfirmation: !!oldEntry && !equal(oldEntry, newEntry)};
 }
 export function planConsoleChange(catalog, incoming) {
   validateConfig({consoles:[incoming]});
   const existing = catalog.consoles.find(c => consoleKey(c.shortName) === consoleKey(incoming.shortName));
+  const metadata = ({emulators, ...fields}) => fields;
   return {kind:'console',shortName:incoming.shortName,platform:incoming.longName,
+    exactMatch:!!existing && equal(metadata(existing),metadata(incoming)),
     consoleEntry:clone(incoming),beforeConsole:clone(existing),entryChanged:!equal(existing,incoming),
     needsConfirmation:!!existing && !equal(existing,incoming)};
 }
