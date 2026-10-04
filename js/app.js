@@ -132,7 +132,21 @@ function findDefinition(shortName, id) {
     (isConsoleEntry(m) ? m.emulators : [m.emulator]).some(e => e.id.toLowerCase() === id.toLowerCase())));
 }
 function rowControl(symbol, label, callback, className) {
-  const control = button(symbol, callback, 'row-button ' + className);
+  const control = button('', callback, 'row-button ' + className);
+  const paths = {
+    '+': 'M12 5v14M5 12h14',
+    '−': 'M5 12h14',
+    '✓': 'M5 12l4 5L19 7',
+    'i': 'M12 11v7M12 6h.01'
+  };
+  const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  icon.setAttribute('viewBox', '0 0 24 24');
+  icon.setAttribute('aria-hidden', 'true');
+  icon.setAttribute('focusable', 'false');
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', paths[symbol]);
+  icon.append(path);
+  control.append(icon);
   control.setAttribute('aria-label',label); control.title = label;
   return control;
 }
