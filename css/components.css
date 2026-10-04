@@ -51,6 +51,13 @@ select option { background: #22212b; color: #f0eff7; }
 .detail-description a{color:var(--blue);text-decoration:underline;text-underline-offset:3px}
 .detail-description a:hover{color:var(--text)}
 
+.row-label.has-status{display:flex;align-items:center;gap:10px}
+.row-label.has-status>span:last-child{min-width:0}
+.emulator-status{--status-color:#858294;--status-glow:#85829400;width:7px;height:7px;flex:none;border-radius:50%;background:var(--status-color);box-shadow:0 0 0 3px color-mix(in srgb,var(--status-color) 9%,transparent),0 0 9px 2px var(--status-glow)}
+.emulator-status[data-status="red"]{--status-color:#ef8799;--status-glow:#ef87994d}
+.emulator-status[data-status="yellow"]{--status-color:#ecd28b;--status-glow:#ecd28b4d}
+.emulator-status[data-status="green"]{--status-color:#8bd6b1;--status-glow:#8bd6b14d}
+
 .console-header{display:flex;align-items:center;gap:10px;margin:0 12px 8px;min-height:36px}
 .console-header .console-title{padding:0;min-width:0;overflow-wrap:anywhere}
 .console-header .console-title:after{display:none}

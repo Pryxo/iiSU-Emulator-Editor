@@ -48,6 +48,10 @@ The config header's minus button removes the whole console and all its emulator 
 2. Add a `description` and an `entries` array of `{ shortName, emulator }` objects. Copy an existing emulator file as a starting point.
 3. Register `{ "id": "your-emulator", "path": "your-emulator/emulator.json" }` in `emulators/index.json`.
 
+Add an optional numeric `status` at the top level of `emulator.json`, alongside `description` and `entries`: `"status": 0` shows a red dot, `"status": 1` yellow, and `"status": 2` green. The softly glowing dot appears to the left of every database row from that definition. Missing or unrecognized values show a muted gray dot. Status is database metadata only and is never copied into the user's configuration.
+
+Hover labels are **Not Working** (0), **Needs Testing** (1), **Fully Working** (2), and **Missing Info** (missing or invalid status). Screen readers use the same labels.
+
 Each mapping's `shortName` selects its console. An emulator requires `id`, `name`, `routeType`, non-empty `commands` (each with `description` and `command`), and optional `packages`. Copy launch commands accurately. One package may map to several consoles; short names must be unique within a definition. Registry IDs and console template short names must also be unique.
 
 Emulator rows remain visible under a missing platform, but their + buttons are disabled until its console is added. Adding or updating an individual emulator preserves console metadata and other emulator entries. Existing emulator IDs match without case sensitivity; commands merge by description and packages are combined without duplicates. Updates to an existing emulator require confirmation. The emulator info button shows only that emulator's JSON. Removing its last emulator keeps the console.
