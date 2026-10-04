@@ -8,7 +8,9 @@ Each console has a unique `shortName`, a `longName`, and an `emulators` array. O
 
 ## Merge and undo
 
-New emulator entries append to an existing console. Existing entries retain unknown keys and unrelated commands. Commands match by description; package arrays are unioned. The info button shows the database description, when available, above read-only JSON for the emulator. Descriptions are not included in the exported catalog. The original catalog is never mutated. Undo rebuilds the current catalog from the original and remaining actions.
+Full console definitions can create missing platforms with their metadata and all emulators in one action. Console short names match ignoring capitalization and surrounding spaces. If a console already exists, its metadata is preserved and only its emulators are merged. Repeated adds do not create duplicates. New consoles appear as complete objects in the Changes dialog, including empty consoles. Undoing their addition removes the new console; removing the last emulator alone keeps it.
+
+New single-emulator mappings append to an existing console. Existing entries retain unknown keys and unrelated commands. Commands match by description; package arrays are unioned. The info button shows the database description, when available, above read-only JSON for the emulator. Descriptions are not included in the exported catalog. The original catalog is never mutated. Undo rebuilds the current catalog from the original and remaining actions.
 
 The minus button removes an emulator from that console. Other emulator entries and unrelated settings are preserved. The Changes dialog shows additions, modifications, and removals and supports Undo all.
 

@@ -4,6 +4,10 @@
     {
       "id": "eden-duo",
       "path": "eden-duo/emulator.json"
+    },
+    {
+      "id": "joiplay",
+      "path": "joiplay/emulator.json"
     }
   ]
 }

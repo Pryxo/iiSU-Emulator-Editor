@@ -1,4 +1,5 @@
 export const isObject = value => value !== null && typeof value === 'object' && !Array.isArray(value);
+export const consoleKey = value => value.trim().toLowerCase();
 const required = (condition, message) => { if (!condition) throw new Error(message); };
 const text = value => typeof value === 'string' && value.trim().length > 0;
 export function validateEmulator(entry, location = 'Emulator') {
@@ -21,9 +22,10 @@ export function validateConfig(data) {
   const consoles = new Set();
   for (const c of data.consoles) {
     required(isObject(c) && text(c.shortName), 'Each console needs a shortName.');
-    required(!consoles.has(c.shortName), `Duplicate console shortName: ${c.shortName}.`);
-    consoles.add(c.shortName);
+    required(!consoles.has(consoleKey(c.shortName)), `Duplicate console shortName: ${c.shortName}.`);
+    consoles.add(consoleKey(c.shortName));
     required(text(c.longName) && Array.isArray(c.emulators), `${c.shortName}: expected longName and emulators array.`);
+    required(c.romExtensions === undefined || (Array.isArray(c.romExtensions) && c.romExtensions.every(text)), `${c.shortName}: romExtensions must contain strings.`);
     const ids = new Set();
     for (const e of c.emulators) {
       validateEmulator(e, c.shortName);

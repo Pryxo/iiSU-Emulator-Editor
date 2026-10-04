@@ -1,0 +1,28 @@
+{
+  "description": "Official JoiPlay isnt supported since they dont export the activity to start games, check this out for more infos on how to get joiplay working in iiSU, https://github.com/Pryxo/JoiPlay-Shortcut-Generator",
+  "entries": [
+    {
+      "shortName": "joiplay",
+      "longName": "JoiPlay",
+      "releaseYear": "2019",
+      "releaseDate": "2019-12-16",
+      "manufacturer": "JoiPlay",
+      "retroAchievementsId": "NA",
+      "romExtensions": [".jp", ".JP", ".joiplay", ".JOIPLAY"],
+      "emulators": [
+        {
+          "id": "JOIPLAY",
+          "name": "JoiPlay (Standalone)",
+          "routeType": "fileContent",
+          "commands": [
+            {
+              "description": "JoiPlay",
+              "command": "cyou.joiplay.joiplay/.activities.ShortcutActivity -e id \"%ROM_CONTENT%\""
+            }
+          ],
+          "packages": ["cyou.joiplay.joiplay"]
+        }
+      ]
+    }
+  ]
+}

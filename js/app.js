@@ -1,6 +1,7 @@
 import {SETTINGS} from './settings.js';
 import {readConfig} from './config-loader.js';
-import {loadEmulators} from './emulator-loader.js';
+import {loadEmulators, isConsoleEntry} from './emulator-loader.js';
+import {consoleKey} from './config-validator.js';
 import {createPlatformFilter} from './platform-filter.js';
 import {clone, equal, planChange, planRemoval, applyPlan, rebuild, changesBetween} from './config-merger.js';
 import {downloadJSON} from './download.js';
@@ -106,10 +107,20 @@ function renderUpload() {
 
 }
 
+function availableConsoles() {
+  const consoles = new Map((state.modified?.consoles || []).map(c => [consoleKey(c.shortName),c]));
+  for (const definition of state.definitions) for (const entry of definition.entries) {
+    if (isConsoleEntry(entry) && !consoles.has(consoleKey(entry.shortName))) {
+      consoles.set(consoleKey(entry.shortName), {...entry,emulators:[]});
+    }
+  }
+  return [...consoles.values()];
+}
 function renderPlatforms() {
-  const options = [...(state.modified?.consoles || [])]
+  const options = availableConsoles()
     .sort((a,b) => a.longName.localeCompare(b.longName))
     .map(c => ({value:c.shortName, label:c.longName}));
+  if (state.platform !== 'all' && !options.some(option => option.value === state.platform)) state.platform = 'all';
   platformFilter.setOptions([{value:'all',label:'All consoles'}, ...options],state.platform);
 }
 function matches(consoleEntry, emulator) {
@@ -117,7 +128,8 @@ function matches(consoleEntry, emulator) {
     (consoleEntry.longName + ' ' + consoleEntry.shortName + ' ' + emulator.name + ' ' + emulator.id).toLowerCase().includes(state.search);
 }
 function findDefinition(shortName, id) {
-  return state.definitions.find(d => d.entries.some(m => m.shortName === shortName && m.emulator.id.toLowerCase() === id.toLowerCase()));
+  return state.definitions.find(d => d.entries.some(m => consoleKey(m.shortName) === consoleKey(shortName) &&
+    (isConsoleEntry(m) ? m.emulators : [m.emulator]).some(e => e.id.toLowerCase() === id.toLowerCase())));
 }
 function rowControl(symbol, label, callback, className) {
   const control = button(symbol, callback, 'row-button ' + className);
@@ -150,26 +162,51 @@ function renderRow(consoleEntry, emulator, definition, isDatabase) {
   row.append(label,controls);
   return row;
 }
+function renderConsoleRow(consoleEntry, mapping, definition) {
+  const row = el('div','emulator-row');
+  row.dataset.console = consoleEntry.shortName;
+  row.dataset.emulatorId = 'console:' + consoleKey(mapping.shortName);
+  const plan = planChange(state.modified,definition,consoleEntry.shortName);
+  const present = state.modified.consoles.some(c => consoleKey(c.shortName) === consoleKey(consoleEntry.shortName));
+  const controls = el('div','row-controls');
+  const label = (plan.entryChanged ? (present ? 'Apply console emulators: ' : 'Add console: ') : 'Already added: ') + mapping.longName;
+  const add = rowControl(plan.entryChanged ? '+' : '✓',label, () => addEmulator(definition,consoleEntry.shortName),plan.entryChanged ? 'add' : 'added');
+  add.disabled = !plan.entryChanged;
+  controls.append(add,rowControl('i','Info: ' + mapping.longName + ' console',() => {
+    detailReturnFocus = {side:'database',shortName:consoleEntry.shortName,id:row.dataset.emulatorId};
+    $('#detail-title').textContent = mapping.longName + ' (console)';
+    const content = definition.description.trim() ? [descriptionView(definition.description)] : [];
+    content.push(jsonViewer(mapping,'Console entry'));
+    $('#detail-content').replaceChildren(...content);
+    $('#detail-dialog').showModal();
+  },'info'));
+  row.append(el('div','row-label',mapping.longName + ' (console)'),controls);
+  return row;
+}
 function renderLists() {
   if (!state.modified) return;
   const databaseGroups = [], configGroups = [];
   const visibleEmulators = new Set();
   let databaseCount = 0, configCount = 0;
-  const consoles = [...state.modified.consoles].sort((a,b) => a.longName.localeCompare(b.longName));
+  const consoles = availableConsoles().sort((a,b) => a.longName.localeCompare(b.longName));
   for (const consoleEntry of consoles) {
+    const present = state.modified.consoles.some(c => consoleKey(c.shortName) === consoleKey(consoleEntry.shortName));
     const available = state.definitions.flatMap(definition =>
-      definition.entries.filter(m => m.shortName === consoleEntry.shortName).map(m => ({definition, emulator:m.emulator})))
-      .filter(item => matches(consoleEntry,item.emulator)).sort((a,b) => a.emulator.name.localeCompare(b.emulator.name));
+      definition.entries.filter(m => consoleKey(m.shortName) === consoleKey(consoleEntry.shortName) && (present || isConsoleEntry(m)))
+        .map(m => ({definition, mapping:m, emulator:isConsoleEntry(m) ? {name:m.longName,id:m.shortName} : m.emulator})))
+      .filter(item => matches(consoleEntry,item.emulator) || (isConsoleEntry(item.mapping) && item.mapping.emulators.some(e => matches(consoleEntry,e))))
+      .sort((a,b) => a.emulator.name.localeCompare(b.emulator.name));
     const existing = consoleEntry.emulators.filter(e => matches(consoleEntry,e)).slice().sort((a,b) => a.name.localeCompare(b.name));
     if (available.length) {
       available.forEach(item => visibleEmulators.add(item.definition));
       const group = el('section','console-group'); group.append(el('h3','console-title',consoleEntry.longName));
-      group.append(...available.map(item => renderRow(consoleEntry,item.emulator,item.definition,true)));
+      group.append(...available.map(item => isConsoleEntry(item.mapping) ? renderConsoleRow(consoleEntry,item.mapping,item.definition) : renderRow(consoleEntry,item.emulator,item.definition,true)));
       databaseGroups.push(group); databaseCount += available.length;
     }
-    if (existing.length) {
+    if (existing.length || (present && !consoleEntry.emulators.length && matches(consoleEntry,{name:'',id:''}))) {
       const group = el('section','console-group'); group.append(el('h3','console-title',consoleEntry.longName));
       group.append(...existing.map(e => renderRow(consoleEntry,e,findDefinition(consoleEntry.shortName,e.id),false)));
+      if (!existing.length) group.append(el('p','empty-list','No emulators here yet.'));
       configGroups.push(group); configCount += existing.length;
     }
   }
@@ -199,14 +236,14 @@ function undo() {
 async function applyWithConfirmation(plan) {
   if (!plan.entryChanged) return false;
   if (plan.needsConfirmation && !await confirmAction('Update ' + plan.platform + '?',
-    'Apply this emulator to your config?', 'Apply changes')) return false;
+    plan.kind === 'console' ? 'Merge the emulators from this console entry into your config? Your existing console settings will be kept.' : 'Apply this emulator to your config?', 'Apply changes')) return false;
   commit(plan);
   return true;
 }
 async function addEmulator(definition, shortName) {
   try {
     const plan = planChange(state.modified,definition,shortName);
-    if (await applyWithConfirmation(plan)) toast('Emulator added');
+    if (await applyWithConfirmation(plan)) toast(plan.kind === 'console' ? 'Console entry applied' : 'Emulator added');
   } catch (error) { toast(error.message,true); }
 }
 function showDetail(consoleEntry, emulator, definition, isDatabase) {
@@ -248,6 +285,7 @@ function showFile() {
 }
 function render() {
   renderUpload();
+  renderPlatforms();
   renderLists();
   $('#workspace-status').textContent = state.changes.length ? state.changes.length + (state.changes.length === 1 ? ' change' : ' changes') : 'No changes';
   $('#undo').disabled = !state.actions.length;
@@ -276,6 +314,6 @@ async function loadLibrary() {
   } catch(error) {
     showError('#library-error',error.message);
     $('#library-error').append(button('Retry',loadLibrary));
-  } finally { state.libraryLoading = false; renderLists(); }
+  } finally { state.libraryLoading = false; render(); }
 }
 render(); loadLibrary();
