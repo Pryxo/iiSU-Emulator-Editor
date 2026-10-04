@@ -16,7 +16,7 @@
   <div class="upload-wrap">
     <button id="upload-zone" class="upload-zone" aria-labelledby="upload-heading" aria-describedby="upload-file">
       <span class="upload-icon" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><path d="M24 31V10m-8 8 8-8 8 8M11 30v8h26v-8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-      <h1 id="upload-heading">Upload file</h1><p id="upload-file">emuladores.json</p><span class="upload-hint">Drop here or click to browse</span>
+      <h1 id="upload-heading">Upload file</h1><p id="upload-file">JSON configuration (.json)</p><span class="upload-hint">Drop here or click to browse</span>
     </button>
     <div id="file-error" class="inline-error" role="alert" hidden></div>
     <p class="privacy-note">Your file stays on your device.</p>
@@ -41,7 +41,7 @@
   </div>
 </section>
 </main>
-<input id="file-input" class="visually-hidden" type="file" accept=".json,application/json" aria-label="Choose emuladores.json">
+<input id="file-input" class="visually-hidden" type="file" accept=".json,application/json" aria-label="Choose a JSON configuration file">
 <dialog id="detail-dialog" aria-labelledby="detail-title"><div class="dialog-top"><h2 id="detail-title">Emulator</h2><button class="icon-button" data-close aria-label="Close emulator details">×</button></div><div id="detail-content"></div></dialog>
 <dialog id="preview-dialog" class="wide-dialog" aria-labelledby="preview-title"><div class="dialog-top"><h2 id="preview-title">Changes</h2><button class="icon-button" data-close aria-label="Close preview">×</button></div><div id="preview-content"></div></dialog>
 <dialog id="confirm-dialog" aria-labelledby="confirm-title"><div class="dialog-top"><h2 id="confirm-title">Update settings?</h2><button class="icon-button" data-close aria-label="Cancel update">×</button></div><p id="confirm-message"></p><div class="confirm-actions"><button class="button secondary" id="cancel-confirm">Cancel</button><button class="button primary" id="accept-confirm">Apply</button></div></dialog>

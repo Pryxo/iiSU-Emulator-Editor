@@ -1,21 +1,48 @@
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import {pathToFileURL} from 'node:url';
+import {spawn} from 'node:child_process';
+import {createFixtures} from './fixtures.js';
 const {chromium}=await import(process.env.PLAYWRIGHT_PATH?pathToFileURL(process.env.PLAYWRIGHT_PATH).href:'playwright');
-const browser=await chromium.launch({channel:'msedge',headless:true});
+// Override these when testing an existing deployment or a specific browser.
+let server;
+const baseURL = process.env.BASE_URL || await new Promise((resolve, reject) => {
+ server = spawn(process.execPath, ['scripts/serve.js'], {env: {...process.env, PORT: '0'}, stdio: ['ignore','pipe','pipe'], windowsHide: true});
+ const timer = setTimeout(() => { server.kill(); reject(new Error('Preview server did not start')); }, 10000);
+ let output = '';
+ server.stdout.on('data', chunk => {
+  output += chunk;
+  const match = output.match(/Preview: (http:\/\/\S+)/);
+  if (match) { clearTimeout(timer); resolve(match[1]); }
+ });
+ server.on('error', error => { clearTimeout(timer); reject(error); });
+ server.on('exit', code => { clearTimeout(timer); reject(new Error('Preview server exited: ' + code)); });
+ server.stderr.on('data', chunk => process.stderr.write(chunk));
+});
+let browser;
+try {
+browser=await chromium.launch({headless:true, ...(process.env.BROWSER_CHANNEL ? {channel:process.env.BROWSER_CHANNEL} : {})});
 const context=await browser.newContext({viewport:{width:1440,height:960},acceptDownloads:true});
 const page=await context.newPage(),errors=[],requests=[];
 page.on('pageerror',error=>errors.push(error.message));
 page.on('request',request=>requests.push({url:request.url(),method:request.method(),body:request.postData()}));
 await mkdir('.qa',{recursive:true});
-const definition=JSON.parse(await readFile('emulators/eden-duo/emulator.json','utf8'));
-const payload=definition.entries[0].emulator;
-const fixtureCatalog={consoles:[{shortName:'switch',longName:'Nintendo Switch',emulators:[]},{shortName:'other',longName:'Other',emulators:[]}]};
-const inputFile=process.env.REAL_INPUTS==='1'?'emuladores.json':
- {name:'emuladores.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(fixtureCatalog))};
-const original=process.env.REAL_INPUTS==='1'?JSON.parse((await readFile('emuladores.json','utf8')).replace(/^\uFEFF/,'')):fixtureCatalog;
-try {
- await page.goto('http://127.0.0.1:4173/emuconfig/');
+const {singleDefinition: definition, fullDefinition, catalog: original, registry, definitions} = createFixtures();
+const mapping = definition.entries[0];
+const payload = mapping.emulator;
+const consoleMapping = fullDefinition.entries[0];
+const platform = original.consoles.find(c => c.shortName === mapping.shortName);
+const row = (side, id) => page.locator('#' + side + '-list [data-emulator-id=' + JSON.stringify(id) + ']');
+const option = shortName => page.locator('#platform-menu [data-value=' + JSON.stringify(shortName) + ']');
+const inputFile = {name:'configuration.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(original))};
+// Intercept only catalog requests. The app, styles, and module loading stay real.
+await page.route('**/emulators/**', route => {
+ const pathname = new URL(route.request().url()).pathname;
+ const id = pathname.split('/').at(-2);
+ const json = pathname.endsWith('/index.json') ? registry : definitions.get(id);
+ return json ? route.fulfill({json}) : route.fulfill({status:404,body:'Unknown fixture'});
+});
+ await page.goto(baseURL);
  assert.equal(await page.locator('#workspace').isVisible(),false);
  await page.locator('#file-input').setInputFiles({name:'bad.json',mimeType:'application/json',buffer:Buffer.from('{no')});
  await page.locator('#file-error').filter({hasText:'Could not parse JSON'}).waitFor();
@@ -23,25 +50,22 @@ try {
  await page.locator('#file-input').setInputFiles(inputFile);
  await page.locator('#workspace').waitFor();
  await page.locator('#database-list .emulator-row').first().waitFor();
- assert.equal(await page.locator('#database-count').textContent(),'2 emulators');
- assert.equal(await page.locator('#database-list .emulator-row').count(),2);
- if(process.env.REAL_INPUTS==='1'){
-  const original=JSON.parse((await readFile('emuladores.json','utf8')).replace(/^\uFEFF/,''));
-  assert.equal(Number(await page.locator('#config-count').textContent()),original.consoles.reduce((count,c)=>count+c.emulators.length,0));
- }
+ assert.equal(await page.locator('#database-count').textContent(),registry.emulators.length + ' emulators');
+ assert.equal(await page.locator('#database-list .emulator-row').count(),[...definitions.values()].reduce((sum,d)=>sum+d.entries.length,0));
  const trigger=page.getByRole('combobox',{name:'Filter by console'});
  await trigger.click();
- await page.locator('#platform-menu [data-value="switch"]').click();
+ await option(mapping.shortName).click();
  await trigger.click();
  const bounds=await page.locator('#platform-menu').boundingBox();
  assert.ok(bounds.height<=320 && bounds.y+bounds.height<=960);
  const selected=await page.locator('#platform-menu [aria-selected="true"]').boundingBox();
  assert.ok(selected.y>=bounds.y && selected.y+selected.height<=bounds.y+bounds.height);
  await page.keyboard.press('Home');await page.keyboard.press('Escape');
- assert.equal(await page.locator('.platform-label').textContent(),'Nintendo Switch');
- const databaseRow=page.locator('#database-list [data-emulator-id="EDEN-DUO"]');
- const configRow=page.locator('#config-list [data-emulator-id="EDEN-DUO"]');
+ assert.equal(await page.locator('.platform-label').textContent(),platform.longName);
+ const databaseRow=row('database',payload.id);
+ const configRow=row('config',payload.id);
  await databaseRow.locator('.info').click();
+ assert.equal(await page.locator('#detail-title').textContent(),payload.name);
  assert.equal(await page.locator('#detail-content select, #detail-content input, #detail-content textarea, #detail-content .detail-action').count(),0);
  assert.deepEqual(JSON.parse(await page.locator('#detail-content pre').textContent()),payload);
  assert.equal(await page.locator('#detail-content .detail-description').textContent(),definition.description);
@@ -64,10 +88,10 @@ try {
  const output=page.waitForEvent('download');
  await page.locator('#download-config').click();
  const download=await output;
- assert.equal(download.suggestedFilename(),'emuladores.json');
- await download.saveAs('.qa/eden-duo-export.json');
- const exported=JSON.parse((await readFile('.qa/eden-duo-export.json','utf8')).replace(/^\uFEFF/,''));
- const expected=structuredClone(original);expected.consoles.find(c=>c.shortName==='switch').emulators.push(payload);
+ assert.equal(download.suggestedFilename(),inputFile.name);
+ await download.saveAs('.qa/browser-export.json');
+ const exported=JSON.parse((await readFile('.qa/browser-export.json','utf8')).replace(/^\uFEFF/,''));
+ const expected=structuredClone(original);expected.consoles.find(c=>c.shortName===mapping.shortName).emulators.push(payload);
  assert.deepEqual(exported,expected);
  await page.locator('#file-input').setInputFiles({name:'bad.json',mimeType:'application/json',buffer:Buffer.from('{no')});
  await page.locator('#workspace-error').waitFor();
@@ -75,7 +99,7 @@ try {
  await page.locator('#file-input').setInputFiles(inputFile);
  await page.locator('#cancel-confirm').click();
  assert.equal(await page.locator('#workspace-status').textContent(),'1 change');
- await page.screenshot({path:'.qa/eden-duo-workspace.png'});
+ await page.screenshot({path:'.qa/browser-workspace.png'});
  await configRow.locator('.remove').click();
  assert.equal(await configRow.count(),0);
  assert.equal(await page.locator('#workspace-status').textContent(),'No changes');
@@ -112,56 +136,56 @@ try {
  await page.locator('#workspace').waitFor();
  assert.equal(await page.locator('#config-count').textContent(),'0');
  // Complete console entries remain discoverable even with an empty uploaded catalog.
- const joi=JSON.parse(await readFile('emulators/joiplay/emulator.json','utf8'));
- const joiRow=page.locator('#database-list [data-emulator-id="console:joiplay"]');
- await joiRow.waitFor();
- await trigger.click();await page.locator('#platform-menu [data-value="joiplay"]').click();
- await joiRow.locator('.info').click();
- assert.deepEqual(JSON.parse(await page.locator('#detail-content pre').textContent()),joi.entries[0]);
+ const consoleDefinition=fullDefinition;
+ const consoleRow=row('database','console:' + consoleMapping.shortName);
+ await consoleRow.waitFor();
+ await trigger.click();await option(consoleMapping.shortName).click();
+ await consoleRow.locator('.info').click();
+ assert.deepEqual(JSON.parse(await page.locator('#detail-content pre').textContent()),consoleDefinition.entries[0]);
  await page.keyboard.press('Escape');
- await joiRow.locator('.add').click();
- await page.locator('#config-list [data-emulator-id="JOIPLAY"]').waitFor();
- assert.equal(await joiRow.locator('.added').isDisabled(),true);
+ await consoleRow.locator('.add').click();
+ await row('config',consoleMapping.emulators[0].id).waitFor();
+ assert.equal(await consoleRow.locator('.added').isDisabled(),true);
  await page.locator('#nav-changes').click();
- assert.deepEqual(JSON.parse(await page.locator('#preview-dialog .diff-block pre').last().textContent()),joi.entries[0]);
+ assert.deepEqual(JSON.parse(await page.locator('#preview-dialog .diff-block pre').last().textContent()),consoleDefinition.entries[0]);
  await page.keyboard.press('Escape');
- const joiOutput=page.waitForEvent('download');await page.locator('#download-config').click();
- await (await joiOutput).saveAs('.qa/joiplay-export.json');
- assert.deepEqual(JSON.parse(await readFile('.qa/joiplay-export.json','utf8')),{consoles:joi.entries});
+ const consoleOutput=page.waitForEvent('download');await page.locator('#download-config').click();
+ await (await consoleOutput).saveAs('.qa/console-export.json');
+ assert.deepEqual(JSON.parse(await readFile('.qa/console-export.json','utf8')),{consoles:consoleDefinition.entries});
  await page.locator('#undo').click();
- assert.equal(await page.locator('#config-list [data-emulator-id="JOIPLAY"]').count(),0);
+ assert.equal(await row('config',consoleMapping.emulators[0].id).count(),0);
  assert.equal(await page.locator('#workspace-status').textContent(),'No changes');
- assert.equal(await joiRow.locator('.add').isEnabled(),true);
+ assert.equal(await consoleRow.locator('.add').isEnabled(),true);
  // An existing console with a differently cased short name keeps its metadata.
- const localConsole={shortName:'JOIPLAY',longName:'My games',romExtensions:['.mine'],custom:42,emulators:[]};
+ const localConsole={shortName:consoleMapping.shortName.toUpperCase(),longName:'My games',romExtensions:['.mine'],custom:42,emulators:[]};
  await page.locator('#file-input').setInputFiles({name:'existing.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify({consoles:[localConsole]}))});
- await joiRow.locator('.add').click();
+ await consoleRow.locator('.add').click();
  const mergedOutput=page.waitForEvent('download');await page.locator('#download-config').click();
- await (await mergedOutput).saveAs('.qa/joiplay-merged.json');
- assert.deepEqual(JSON.parse(await readFile('.qa/joiplay-merged.json','utf8')),{consoles:[{...localConsole,emulators:joi.entries[0].emulators}]});
+ await (await mergedOutput).saveAs('.qa/console-merged.json');
+ assert.deepEqual(JSON.parse(await readFile('.qa/console-merged.json','utf8')),{consoles:[{...localConsole,emulators:consoleDefinition.entries[0].emulators}]});
  await page.locator('#undo').click();
- const customized=structuredClone(joi.entries[0]);customized.emulators[0].commands[0].command='my local command';
+ const customized=structuredClone(consoleDefinition.entries[0]);customized.emulators[0].commands[0].command='my local command';
  await page.locator('#file-input').setInputFiles({name:'custom.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify({consoles:[customized]}))});
- await joiRow.locator('.add').click();await page.locator('#cancel-confirm').click();
+ await consoleRow.locator('.add').click();await page.locator('#cancel-confirm').click();
  assert.equal(await page.locator('#workspace-status').textContent(),'No changes');
- await joiRow.locator('.add').click();await page.locator('#accept-confirm').click();
- assert.equal(await joiRow.locator('.added').isDisabled(),true);
+ await consoleRow.locator('.add').click();await page.locator('#accept-confirm').click();
+ assert.equal(await consoleRow.locator('.added').isDisabled(),true);
  await page.locator('#nav-changes').click();await page.getByRole('button',{name:'Undo all',exact:true}).click();
  await page.locator('#accept-confirm').click();
  await page.locator('#preview-dialog').waitFor({state:'hidden'});
  assert.equal(await page.locator('#workspace-status').textContent(),'No changes');
- await page.route('**/eden-duo/emulator.json*',route=>route.fulfill({json:{description:'Invalid entry',entries:[]}}));
+ await page.route('**/' + registry.emulators.find(entry=>definitions.get(entry.id)===definition).path + '*',route=>route.fulfill({json:{description:'Invalid entry',entries:[]}}));
  await page.reload();await page.locator('#file-input').setInputFiles(inputFile);
  await page.locator('#library-error').waitFor();
- assert.equal(await page.locator('#database-list .emulator-row').count(),1);
+ assert.equal(await page.locator('#database-list .emulator-row').count(),[...definitions.values()].filter(d=>d!==definition).reduce((sum,d)=>sum+d.entries.length,0));
  assert.equal(await page.locator('.row-icon, .emulator-row img').count(),0);
  assert.deepEqual(errors,[]);
- assert.ok(requests.every(r=>r.method==='GET'&&!r.body&&r.url.startsWith('http://127.0.0.1:4173/')));
+ assert.ok(requests.every(r=>r.method==='GET'&&!r.body&&new URL(r.url).origin===new URL(baseURL).origin));
  const assetRequests=requests.map(r=>new URL(r.url)).filter(url=>/\.(js|css|json)$/.test(url.pathname));
  const assetVersion=assetRequests.find(url=>url.pathname.endsWith('/js/app.js')).searchParams.get('v');
  assert.match(assetVersion,/^[a-f0-9]{16}$/);
  assert.ok(assetRequests.every(url=>url.searchParams.get('v')===assetVersion));
- await writeFile('.qa/eden-duo-results.json',JSON.stringify({passed:true,errors,checks:['custom-only database','exact Eden Duo payload','single-file upload','invalid JSON','platform filter','read-only info','offline add','duplicate detection','exact JSON export','invalid replacement','cancel replacement','remove','undo','search','file preview','mobile','keyboard','reduced motion','refresh clearing','drag/drop','invalid definition handling','no uploads']},null,2));
- console.log('Eden Duo and full console browser checks passed.');
-}finally{await browser.close();}
+ await writeFile('.qa/browser-results.json',JSON.stringify({passed:true,errors,checks:['custom-only database','exact emulator payload','single-file upload','invalid JSON','platform filter','read-only info','offline add','duplicate detection','exact JSON export','invalid replacement','cancel replacement','remove','undo','search','file preview','mobile','keyboard','reduced motion','refresh clearing','drag/drop','invalid definition handling','no uploads']},null,2));
+ console.log('Sample emulator and full console browser checks passed.');
+}finally{await browser?.close();server?.kill();}
 

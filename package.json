@@ -1,1 +1,11 @@
-{"name":"emuconfig","private":true,"type":"module","scripts":{"test":"node --test tests/*.test.js","build":"node scripts/build.js","start":"node scripts/serve.js"}}
+{
+  "name": "emuconfig",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "build": "node scripts/build.js",
+    "start": "node scripts/serve.js",
+    "test:browser": "npm run build && node tests/browser.mjs"
+  }
+}

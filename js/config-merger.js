@@ -55,7 +55,7 @@ export function applyPlan(catalog, plan) {
     validateConfig(next);
     return next;
   }
-  if (!c) throw new Error('The selected console is missing. Reload emuladores.json.');
+  if (!c) throw new Error('The selected console is missing. Reload your configuration file.');
   if (plan.kind === 'remove') {
     c.emulators = c.emulators.filter(e => e.id.toLowerCase() !== plan.emulatorId.toLowerCase());
     validateConfig(next);

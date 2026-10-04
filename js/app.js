@@ -73,7 +73,7 @@ async function loadFile(files) {
   showError('#file-error', '');
   showError('#workspace-error', '');
   try {
-    if (files.length !== 1) throw new Error('Choose only emuladores.json.');
+    if (files.length !== 1) throw new Error('Choose one JSON configuration file.');
     const file = await readConfig(files[0]);
     if (state.changes.length && !await confirmAction('Replace file?', 'Your pending changes will be cleared.', 'Replace')) return;
     state.file = file;
@@ -140,7 +140,7 @@ function renderRow(consoleEntry, emulator, definition, isDatabase) {
   const row = el('div','emulator-row');
   row.dataset.console = consoleEntry.shortName;
   row.dataset.emulatorId = emulator.id;
-  const label = el('div','row-label',emulator.name.replace(/\s*\(Standalone\)/g,''));
+  const label = el('div','row-label',emulator.name);
   const controls = el('div','row-controls');
   if (isDatabase) {
     const exists = consoleEntry.emulators.some(e => e.id.toLowerCase() === emulator.id.toLowerCase());
@@ -248,7 +248,7 @@ async function addEmulator(definition, shortName) {
 }
 function showDetail(consoleEntry, emulator, definition, isDatabase) {
   detailReturnFocus = {side:isDatabase ? 'database' : 'config',shortName:consoleEntry.shortName,id:emulator.id};
-  $('#detail-title').textContent = emulator.name.replace(/\s*\(Standalone\)/g,'');
+  $('#detail-title').textContent = emulator.name;
   const content = [];
   if (definition?.description.trim()) content.push(descriptionView(definition.description));
   content.push(jsonViewer(emulator,'Emulator entry'));

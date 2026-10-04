@@ -18,6 +18,16 @@ Contributions are welcome through pull requests:
 
 See the [contribution guide](docs/adding-emulators.md) and [JSON format reference](docs/json-format.md) for details. Keep personal configuration files out of pull requests.
 
+## Tests
+
+`npm test` runs the core behavior checks, build checks, and a catalog check that discovers every definition through `emulators/index.json`. New or renamed emulators require no changes to test code. The catalog check validates each definition and checks that every mapping can be added without changing the input or creating duplicates.
+
+Core and browser behavior tests use fictional data from `tests/fixtures.js`. These examples cover single-emulator mappings and complete console entries independently of the real catalog. Tests are excluded from the deployed website.
+
+For browser checks, install Playwright locally with `npm install --no-save --package-lock=false playwright` and install its browser with `npx playwright install chromium`, then run `npm run test:browser`. This builds the site, starts a temporary local server on an available port, and closes it afterward. Screenshots and exported test files go in `.qa/`.
+
+Optional environment variables: `BROWSER_CHANNEL` selects an installed browser such as `msedge` or `chrome`; `BASE_URL` uses an existing built-site server; `PLAYWRIGHT_PATH` points to an existing Playwright module entry file. The browser checks supply their own fictional catalog and never need a personal configuration file.
+
 ## Credits
 
 [Font](https://puzzylpiece.xyz/consolesans/). Made by PuzzylPiece
