@@ -29,5 +29,10 @@
       "id": "kirin",
       "path": "kirin/emulator.json"
     }
+    ,
+    {
+      "id": "azahar-interceptor",
+      "path": "azahar-interceptor/emulator.json"
+    }
   ]
 }

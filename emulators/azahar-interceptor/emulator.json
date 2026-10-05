@@ -1,0 +1,23 @@
+{
+  "description": "Azahar Interceptor by Zeninari, https://github.com/Zeninari/AzaharInterceptor | JSON by Zeninari\nThe best would be to follow the configuration on the github",
+  "status": 2,
+  "entries": [
+    {
+      "shortName": "n3ds",
+      "emulator": {
+        "id": "AZAHARINTERCEPTOR",
+        "name": "Azahar Interceptor",
+        "routeType": "uri",
+        "commands": [
+          {
+            "description": "Azahar Interceptor",
+            "command": "com.zeninari.azaharinterceptor/.MainActivity --activity-clear-task --activity-clear-top -a android.intent.action.VIEW -d %ROM_URI%"
+          }
+        ],
+          "packages": [
+            "com.zeninari.azaharinterceptor"
+        ]
+      }
+    }
+  ]
+}

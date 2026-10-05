@@ -16,6 +16,10 @@
     {
       "id": "kirin",
       "path": "kirin/console.json"
+    },
+    {
+      "id": "n3ds",
+      "path": "n3ds/console.json"
     }
   ]
 }
