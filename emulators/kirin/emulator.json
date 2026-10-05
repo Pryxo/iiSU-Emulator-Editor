@@ -11,7 +11,7 @@
         "commands": [
           {
             "description": "Kirin",
-            "command": "com.gmax.kirin/com.gmax.kirin.LibraryActivity -a com.gmax.kirin.action.LAUNCH_GAME_SHORTCUT --es shortcut_game_path \"%ROM_CONTENT%\""
+            "command": "com.gmax.kirin/com.gmax.kirin.LibraryActivity -a com.gmax.kirin.action.LAUNCH_GAME_SHORTCUT -e shortcut_game_path \"%ROM_CONTENT%\""
           }
         ],
         "packages": [
