@@ -10,8 +10,8 @@
         "routeType": "fileContent",
         "commands": [
           {
-            "description": "Launch DroidDeck game",
-            "command": "com.droiddeck.launcher/com.droiddeck.launcher.MainActivity -a android.intent.action.VIEW -d \"%ROM_CONTENT%\""
+            "description": "DroidDeck (Standalone)",
+            "command": "com.droiddeck.launcher/com.droiddeck.launcher.MainActivity -a com.droiddeck.launcher.LAUNCH_GAME --es app_id \"%ROM_CONTENT%\" --es game_source STEAM"
           }
         ],
         "packages": [
