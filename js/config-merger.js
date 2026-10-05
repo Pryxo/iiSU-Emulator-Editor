@@ -35,14 +35,16 @@ export function planChange(catalog, definition, shortName, emulatorId) {
   const newEntry = mergeEntry(oldEntry, mapping.emulator);
   return {shortName, platform: consoleEntry.longName, beforeEntry: clone(oldEntry), afterEntry: newEntry, exactMatch: equal(oldEntry, mapping.emulator), entryChanged: !equal(oldEntry, newEntry), needsConfirmation: !!oldEntry && !equal(oldEntry, newEntry)};
 }
-export function planConsoleChange(catalog, incoming) {
+export function planConsoleChange(catalog, incoming, {keepEmulators = false} = {}) {
   validateConfig({consoles:[incoming]});
   const existing = catalog.consoles.find(c => consoleKey(c.shortName) === consoleKey(incoming.shortName));
+  const replacement = clone(incoming);
+  if (keepEmulators && existing) replacement.emulators = clone(existing.emulators);
   const metadata = ({emulators, ...fields}) => fields;
   return {kind:'console',shortName:incoming.shortName,platform:incoming.longName,
     exactMatch:!!existing && equal(metadata(existing),metadata(incoming)),
-    consoleEntry:clone(incoming),beforeConsole:clone(existing),entryChanged:!equal(existing,incoming),
-    needsConfirmation:!!existing && !equal(existing,incoming)};
+    consoleEntry:replacement,beforeConsole:clone(existing),entryChanged:!equal(existing,replacement),
+    needsConfirmation:!!existing && !equal(existing,replacement)};
 }
 export function planConsoleRemoval(catalog, shortName) {
   const existing = catalog.consoles.find(c => consoleKey(c.shortName) === consoleKey(shortName));
@@ -55,7 +57,7 @@ export function applyPlan(catalog, plan) {
   if (plan.kind === 'console') {
     validateConfig({consoles:[plan.consoleEntry]});
     if (consoleKey(plan.consoleEntry.shortName) !== consoleKey(plan.shortName)) throw new Error('Console identity does not match the selected console.');
-    // Replacing means using the complete supplied object, including its emulator list.
+    // The plan contains the selected metadata and emulator list for undo/session replay.
     if (c) next.consoles[next.consoles.indexOf(c)] = clone(plan.consoleEntry);
     else next.consoles.push(clone(plan.consoleEntry));
     validateConfig(next);

@@ -193,6 +193,33 @@ test('console replacement is exact and removes stale fields and extra emulators'
  assert.deepEqual(original,snapshot);assert.deepEqual(applyPlan(next,plan),next);
 });
 
+test('console replacement can preserve the exact existing emulators while replacing all metadata',()=>{
+ const incoming=clone(fullDefinition.entries[0]);
+ const local=clone(incoming);
+ local.shortName=' SAMPLE-CONSOLE ';local.longName='Old name';local.obsolete=true;
+ local.emulators[0].commands[0].command='custom command';
+ local.emulators[0].packages.push('local.package');local.emulators[0].extra={setting:true};
+ local.emulators.unshift({...clone(payload),id:'LOCAL'});
+ const original={rootSetting:42,consoles:[local,...fixture().consoles]};
+ const snapshot=clone(original),templateSnapshot=clone(incoming);
+ const plan=planConsoleChange(original,incoming,{keepEmulators:true});
+ const next=applyPlan(original,plan);
+ assert.deepEqual(next,{...original,consoles:[{...incoming,emulators:local.emulators},...original.consoles.slice(1)]});
+ assert.equal(plan.needsConfirmation,true);assert.equal(plan.entryChanged,true);
+ assert.equal(next.consoles[0].obsolete,undefined);
+ assert.deepEqual(rebuild(original,JSON.parse(JSON.stringify([plan]))),next);
+ assert.deepEqual(rebuild(original,[]),snapshot);
+ assert.deepEqual(original,snapshot);assert.deepEqual(incoming,templateSnapshot);
+ next.consoles[0].emulators[0].name='Changed after applying';
+ assert.deepEqual(plan.consoleEntry.emulators,local.emulators);
+ const unchanged=planConsoleChange({consoles:[incoming]},incoming,{keepEmulators:true});
+ assert.equal(unchanged.entryChanged,false);assert.equal(unchanged.needsConfirmation,false);
+ // Empty local lists stay empty; missing consoles still receive template defaults.
+ const empty={consoles:[{...local,emulators:[]}]};
+ assert.deepEqual(applyPlan(empty,planConsoleChange(empty,incoming,{keepEmulators:true})).consoles[0].emulators,[]);
+ assert.deepEqual(applyPlan({consoles:[]},planConsoleChange({consoles:[]},incoming,{keepEmulators:true})).consoles[0],incoming);
+});
+
 test('separate console template can replace metadata, add an emulator, remove everything and undo each step',()=>{
  const {consoleDefinition,consoleEmulatorDefinition}=createFixtures();
  validateConsoleDefinition(consoleDefinition,'sample-console');

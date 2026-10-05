@@ -10,7 +10,7 @@ Each console has a unique `shortName`, a `longName`, and an `emulators` array. C
 
 Database consoles live in `consoles/<id>/console.json` and are registered in `consoles/index.json`. Each definition contains a `description` and a complete `console` object. Console templates appear in the database and console filter even when missing from your configuration.
 
-The header's + adds a missing console, or offers to replace an existing console with the complete database template. Replacement changes all metadata and the emulator array: fields and emulators omitted from the template are removed. You must confirm replacement. The config header's minus removes the whole console and all its emulators after confirmation. Both actions can be undone. The header's info button previews the complete console JSON for that side of the editor.
+The header's + adds a missing console, or offers to replace an existing console with the complete database template. Replacement changes all metadata and, by default, the emulator array: fields and emulators omitted from the template are removed. Select “Keep existing emulators” in the confirmation dialog to preserve your current emulator list and all emulator settings while replacing the remaining console fields. You must confirm replacement. The config header's minus removes the whole console and all its emulators after confirmation. Both actions can be undone. The header's info button previews the complete console JSON for that side of the editor.
 
 Console additions, removals, and metadata changes appear as full objects in the Changes dialog, including empty consoles. Emulator-only changes are shown individually. Matching `shortName` values never create duplicate consoles.
 

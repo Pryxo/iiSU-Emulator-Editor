@@ -199,10 +199,17 @@ function renderConsoleHeader(consoleEntry, definition, isDatabase) {
     const label = plan.exactMatch ? 'Already added console: ' : plan.beforeConsole ? 'Replace console: ' : 'Add console: ';
     const add = rowControl(plan.exactMatch ? '✓' : '+',label + display.longName,async () => {
       try {
-        const current = planConsoleChange(state.modified,definition.console);
+        let current = planConsoleChange(state.modified,definition.console);
         if (current.exactMatch) return;
-        if (current.needsConfirmation && !await confirmAction('Replace ' + display.longName + '?',
-          'Replace this entire console, including all metadata and its ' + current.beforeConsole.emulators.length + ' current emulator(s), with the database console shown in its info panel? The replacement contains ' + current.consoleEntry.emulators.length + ' emulator(s). You can add individual emulators afterward and undo this replacement.', 'Replace console')) return;
+        if (current.needsConfirmation) {
+          const keepEmulators = el('input');
+          keepEmulators.type = 'checkbox';
+          const option = el('label','confirm-option');
+          option.append(keepEmulators,el('span','','Keep existing emulators'));
+          if (!await confirmAction('Replace ' + display.longName + '?',
+            'Replace this console’s metadata with the database console shown in its info panel? By default, its ' + current.beforeConsole.emulators.length + ' current emulator(s) will also be replaced with the database’s ' + current.consoleEntry.emulators.length + ' emulator(s). Select “Keep existing emulators” to preserve your emulator list and all its settings. You can undo this replacement.', 'Replace console', [option])) return;
+          current = planConsoleChange(state.modified,definition.console,{keepEmulators:keepEmulators.checked});
+        }
         commit(current); toast(current.beforeConsole ? 'Console replaced' : 'Console added');
         $('#database-list').focus({preventScroll:true});
       } catch(error) { toast(error.message,true); }

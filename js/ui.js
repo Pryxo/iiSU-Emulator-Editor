@@ -72,9 +72,10 @@ export function setupDialogs() {
     dialog.addEventListener('click', event => { if(event.target === dialog) { const r = dialog.getBoundingClientRect(); if(event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom) dialog.close(); } });
   });
 }
-export function confirmAction(title, message, accept = 'Apply changes') {
+export function confirmAction(title, message, accept = 'Apply changes', options = []) {
   return new Promise(resolve => {
     const dialog = $('#confirm-dialog'); $('#confirm-title').textContent = title; $('#confirm-message').textContent = message; $('#accept-confirm').textContent = accept;
+    $('#confirm-options').replaceChildren(...options);
     let approved = false;
     const yes = () => { approved = true; dialog.close(); }, no = () => dialog.close();
     $('#accept-confirm').addEventListener('click',yes); $('#cancel-confirm').addEventListener('click',no);

@@ -4,7 +4,7 @@
 
 A browser-based editor for iiSU's `emuladores.json`. Load your configuration, browse the emulator library, add or remove emulators, and download the edited file. Files stay in your browser and are not uploaded to a server. Your file, pending edits, undo history, and filters survive visits to the Info page and refreshes in the same tab. They are kept in tab session storage, which normally clears when you close the tab (browser session restore may recover it).
 
-Emulators are grouped by platform. The editor preserves unrelated settings and supports undoing changes. Platform mappings use the console's `shortName`. Console headers can add, replace, or remove a whole platform. Emulator rows edit individual emulators. Console replacement applies the complete template after confirmation; emulator edits preserve platform settings. All actions support undo.
+Emulators are grouped by platform. The editor preserves unrelated settings and supports undoing changes. Platform mappings use the console's `shortName`. Console headers can add, replace, or remove a whole platform. Emulator rows edit individual emulators. Console replacement applies the complete template after confirmation, with an option to keep existing emulators; emulator edits preserve platform settings. All actions support undo.
 
 The database shows an “Already added” checkmark only when the entry matches your current config. Console checks ignore the `emulators` field and compare every other field; individual emulator checks compare the complete emulator entry. Any changed, missing, or extra field in that comparison prevents a match, including nested settings and array order. JSON formatting and object key order do not matter. Emulator updates preserve custom fields, extra commands, and packages, so an updated entry may still differ from the database.
 
@@ -22,7 +22,7 @@ Contributions are welcome through pull requests. Fork this repository and create
    { "id": "my-platform", "path": "my-platform/console.json" }
    ```
 
-A console template adds a missing platform or replaces an existing platform's entire object after confirmation. Include all intended metadata: replacement removes fields and emulators absent from the template.
+A console template adds a missing platform or replaces an existing platform's entire object after confirmation. Include all intended metadata: replacement removes fields and emulators absent from the template by default. Select “Keep existing emulators” to preserve the current emulator list and all its settings while replacing the remaining console fields.
 
 ### Add an emulator
 
