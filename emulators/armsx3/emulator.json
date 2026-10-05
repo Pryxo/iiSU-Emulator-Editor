@@ -3,7 +3,7 @@
   "status": 2, 
   "entries": [
     {
-      "shortName": "armsx3",
+      "shortName": "ps3",
       "emulator": {
         "id": "ARMSX3",
         "name": "ARMSX3 (Standalone)",
