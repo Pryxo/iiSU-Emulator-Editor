@@ -1,5 +1,5 @@
 {
-  "description": "Bachata S4 made by JICA98, https://github.com/JICA98/Bachata-S4 | JSON Source by Pryxo\nIn your ps4 folder for iiSU, create a file named WhatEverGameName.ps4 containing only the title ID/CUSA ID, for example CUSA00900",
+  "description": "Bachata S4 made by JICA98, https://github.com/JICA98/Bachata-S4 | JSON Source by Pryxo\nIn your ps4 folder for iiSU, create a file named WhatEverGameName.ps4 containing only the title ID/CUSA ID, for example CUSA00900\n\niiSU is doing some weird magic and smh it doesnt work, if you found a way around it dm me",
   "status": 0,
   "entries": [
     {
