@@ -28,11 +28,14 @@
     {
       "id": "kirin",
       "path": "kirin/emulator.json"
-    }
-    ,
+    },
     {
       "id": "azahar-interceptor",
       "path": "azahar-interceptor/emulator.json"
+    },
+    {
+      "id": "armsx3",
+      "path": "armsx3/emulator.json"
     }
   ]
 }

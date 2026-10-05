@@ -1,0 +1,23 @@
+{
+  "description": "Its ARMSX3 lol",
+  "status": 2, 
+  "entries": [
+    {
+      "shortName": "armsx3",
+      "emulator": {
+        "id": "ARMSX3",
+        "name": "ARMSX3 (Standalone)",
+        "routeType": "uri",
+        "commands": [
+          {
+            "description": "ARMSX3",
+            "command": "com.armsx3/com.armsx2.MainActivity -a android.intent.action.VIEW -d %ROM_URI%"
+          }
+        ],
+        "packages": [
+          "com.armsx3"
+        ]
+      }
+    }
+  ]
+}
