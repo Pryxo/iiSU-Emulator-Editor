@@ -1,0 +1,30 @@
+{
+  "description": "Adds .droiddeck/.DROIDDECK rom extension to the list",
+  "console": {
+    "shortName": "steam",
+    "longName": "Valve Steam",
+    "releaseYear": "2003",
+    "releaseDate": "2003-09-12",
+    "manufacturer": "Valve",
+    "retroAchievementsId": "NA",
+    "romExtensions": [
+      ".steam",
+      ".STEAM",
+      ".droiddeck",
+      ".DROIDDECK",
+      ".steamappid",
+      ".STEAMAPPID",
+      ".localgameid",
+      ".LOCALGAMEID",
+      ".pcgame",
+      ".PCGAME",
+      ".gog",
+      ".GOG",
+      ".epic",
+      ".EPIC",
+      ".txt",
+      ".TXT"
+    ],
+    "emulators": []
+  }
+}

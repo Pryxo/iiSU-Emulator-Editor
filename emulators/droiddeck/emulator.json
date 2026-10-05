@@ -1,0 +1,23 @@
+{
+  "description": "DroidDeck by ???, https://github.com/Droid-Deck/DroidDeck",
+  "status": 1, 
+  "entries": [
+    {
+      "shortName": "steam",
+      "emulator": {
+        "id": "droiddeck",
+        "name": "DroidDeck (Standalone)",
+        "routeType": "fileContent",
+        "commands": [
+          {
+            "description": "Launch DroidDeck game",
+            "command": "com.droiddeck.launcher/com.droiddeck.launcher.MainActivity -a android.intent.action.VIEW -d \"%ROM_CONTENT%\""
+          }
+        ],
+        "packages": [
+          "com.droiddeck.launcher"
+        ]
+      }
+    }
+  ]
+}

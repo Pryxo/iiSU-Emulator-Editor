@@ -36,6 +36,10 @@
     {
       "id": "armsx3",
       "path": "armsx3/emulator.json"
+    },
+    {
+      "id": "droiddeck",
+      "path": "droiddeck/emulator.json"
     }
   ]
 }
