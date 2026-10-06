@@ -7,11 +7,11 @@
       "emulator": {
         "id": "droiddeck",
         "name": "DroidDeck (Standalone)",
-        "routeType": "fileContent",
+        "routeType": "uri",
         "commands": [
           {
             "description": "DroidDeck (Standalone)",
-            "command": "com.droiddeck.launcher/com.droiddeck.launcher.MainActivity -a com.droiddeck.launcher.LAUNCH_GAME --es app_id \"%ROM_CONTENT%\" --es game_source STEAM"
+            "command": "com.droiddeck.launcher/com.droiddeck.launcher.MainActivity -a android.intent.action.VIEW -d %ROM_URI% --no-launcher-category"
           }
         ],
         "packages": [
