@@ -40,6 +40,10 @@
     {
       "id": "droiddeck",
       "path": "droiddeck/emulator.json"
+    },
+    {
+      "id": "metroidarch",
+      "path": "metroidarch/emulator.json"
     }
   ]
 }

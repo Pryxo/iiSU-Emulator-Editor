@@ -1,0 +1,27 @@
+{
+  "description": "MetroidArch by Raekwon1603, https://github.com/Raekwon1603/RetroArch",
+  "status": 1, 
+  "entries": [
+    {
+      "shortName": "sfc",
+      "emulator": {
+        "id": "metroidarch",
+        "name": "MetroidArch (Standalone)",
+        "routeType": "path",
+        "commands": [
+          {
+            "description": "bsnes HD beta core",
+            "command": "%PACKAGE%/com.retroarch.browser.retroactivity.RetroActivityFuture -e CONFIGFILE /storage/emulated/0/Android/data/%PACKAGE%/files/retroarch.cfg -e LIBRETRO /data/data/%PACKAGE%/cores/bsnes_hd_beta_libretro_android.so -e ROM %ROM% --activity-clear-top"
+          },
+          {
+            "description": "Snes9x core",
+            "command": "%PACKAGE%/com.retroarch.browser.retroactivity.RetroActivityFuture -e CONFIGFILE /storage/emulated/0/Android/data/%PACKAGE%/files/retroarch.cfg -e LIBRETRO /data/data/%PACKAGE%/cores/snes9x_libretro_android.so -e ROM %ROM% --activity-clear-top"
+          }
+        ],
+        "packages": [
+          "com.metroidarch.app.aarch64"
+        ]
+      }
+    }
+  ]
+}
