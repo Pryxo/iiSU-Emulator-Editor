@@ -44,6 +44,10 @@
     {
       "id": "metroidarch",
       "path": "metroidarch/emulator.json"
+    },
+    {
+      "id": "armsx2",
+      "path": "armsx2/emulator.json"
     }
   ]
 }

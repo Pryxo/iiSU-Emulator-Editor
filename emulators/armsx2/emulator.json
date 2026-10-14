@@ -1,0 +1,23 @@
+{
+  "description": "ARMSX2 by bmdhacks, https://armsx2.net/",
+  "status": 2, 
+  "entries": [
+    {
+      "shortName": "ps2",
+      "emulator": {
+        "id": "ARMSX2",
+        "name": "ARMSX2 Refresh Nightly (Standalone)",
+        "routeType": "uri",
+        "commands": [
+          {
+            "description": "ARMSX2",
+            "command": "com.armsx2.nightly/com.armsx2.BootSplashActivity -a android.intent.action.VIEW -d %ROM_URI%"
+          }
+        ],
+        "packages": [
+          "com.armsx2.nightly"
+        ]
+      }
+    }
+  ]
+}
