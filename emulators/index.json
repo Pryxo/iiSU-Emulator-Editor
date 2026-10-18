@@ -48,6 +48,10 @@
     {
       "id": "armsx2",
       "path": "armsx2/emulator.json"
+    },
+    {
+      "id": "bannerhub",
+      "path": "bannerhub/emulator.json"
     }
   ]
 }
