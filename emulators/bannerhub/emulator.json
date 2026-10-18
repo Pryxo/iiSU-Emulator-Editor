@@ -10,11 +10,16 @@
         "routeType": "fileContent",
         "commands": [
           {
-            "description": "BannerHUB (Standalone)",
+            "description": "BannerHUB Normal (Standalone)",
+            "command": "banner.hub.LAUNCH_GAME -n banner.hub/com.xj.landscape.launcher.ui.gamedetail.GameDetailActivity --es localGameId \"{file_content}\" --ez autoStartGame true"
+          },
+          {
+            "description": "BannerHUB Original (Standalone)",
             "command": "com.xiaoji.egggame.LAUNCH_GAME -n com.xiaoji.egggame/com.xj.landscape.launcher.ui.gamedetail.GameDetailActivity --es localGameId \"{file_content}\" --ez autoStartGame true"
           }
         ],
         "packages": [
+          "banner.hub",
           "com.xiaoji.egggame"
         ]
       }
