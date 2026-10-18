@@ -1,0 +1,23 @@
+{
+  "description": "BannerHub by The412Banner, https://github.com/The412Banner/bannerhub | JSON Source by Pryxo\nIn your windows folder for iiSU, create a file named WhatEverGameName.steam or whatever rom extension you want and it should contain only the local game id, for example local_a6bb33fd-ef8a-4cff-bc35-573bf36e98f3",
+  "status": 1, 
+  "entries": [
+    {
+      "shortName": "windows",
+      "emulator": {
+        "id": "gamehub",
+        "name": "BannerHub Original",
+        "routeType": "fileContent",
+        "commands": [
+          {
+            "description": "Launch GameHub local game",
+            "command": "com.xiaoji.egggame.LAUNCH_GAME -n com.xiaoji.egggame/com.xj.landscape.launcher.ui.gamedetail.GameDetailActivity --es localGameId \"{file_content}\" --ez autoStartGame true"
+          }
+        ],
+        "packages": [
+          "com.xiaoji.egggame"
+        ]
+      }
+    }
+  ]
+}
