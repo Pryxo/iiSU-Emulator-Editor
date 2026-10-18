@@ -10,7 +10,7 @@
         "routeType": "uri",
         "commands": [
           {
-            "description": "ARMSX2",
+            "description": "ARMSX2 Refresh Nightly",
             "command": "com.armsx2.nightly/com.armsx2.BootSplashActivity -a android.intent.action.VIEW -d %ROM_URI%"
           }
         ],

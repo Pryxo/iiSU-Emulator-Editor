@@ -6,11 +6,11 @@
       "shortName": "windows",
       "emulator": {
         "id": "gamehub",
-        "name": "BannerHub Original",
+        "name": "BannerHub (Standalone)",
         "routeType": "fileContent",
         "commands": [
           {
-            "description": "Launch GameHub local game",
+            "description": "BannerHUB (Standalone)",
             "command": "com.xiaoji.egggame.LAUNCH_GAME -n com.xiaoji.egggame/com.xj.landscape.launcher.ui.gamedetail.GameDetailActivity --es localGameId \"{file_content}\" --ez autoStartGame true"
           }
         ],
