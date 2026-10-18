@@ -54,8 +54,8 @@
       "path": "bannerhub/emulator.json"
     },
     {
-      "id": "bannerhub",
-      "path": "bannerhub/emulator2.json"
+      "id": "bannerhub2",
+      "path": "bannerhub2/emulator.json"
     }
   ]
 }
