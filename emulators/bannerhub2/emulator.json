@@ -11,11 +11,11 @@
         "commands": [
           {
             "description": "BannerHUB Normal (Standalone)",
-            "command": "banner.hub/com.xj.landscape.launcher.ui.gamedetail.GameDetailActivity -a banner.hub.LAUNCH_GAME --es localGameId \"{file_content}\" --ez autoStartGame true"
+            "command": "banner.hub/com.xj.landscape.launcher.ui.gamedetail.GameDetailActivity -a banner.hub.LAUNCH_GAME --es localGameId %ROM_CONTENT% --ez autoStartGame true"
           },
           {
             "description": "BannerHUB Original (Standalone)",
-            "command": "com.xiaoji.egggame/com.xj.landscape.launcher.ui.gamedetail.GameDetailActivity -a com.xiaoji.egggame.LAUNCH_GAME --es localGameId \"{file_content}\" --ez autoStartGame true"
+            "command": "com.xiaoji.egggame/com.xj.landscape.launcher.ui.gamedetail.GameDetailActivity -a com.xiaoji.egggame.LAUNCH_GAME --es localGameId %ROM_CONTENT% --ez autoStartGame true"
           }
         ],
         "packages": [
