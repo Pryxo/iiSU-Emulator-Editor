@@ -5,12 +5,12 @@
     {
       "shortName": "gbc",
       "emulator": {
-        "id": "PocketDaisy",
+        "id": "pokedaisy",
         "name": "PokeDaisy (Standalone)",
         "routeType": "path",
         "commands": [
           {
-            "description": "ARMSX3",
+            "description": "PokeDaisy",
             "command": "com.pokedaisy.app/.LaunchActivity -e ROM %ROM%"
           }
         ],
