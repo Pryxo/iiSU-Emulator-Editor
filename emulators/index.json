@@ -56,6 +56,18 @@
     {
       "id": "bannerhub2",
       "path": "bannerhub2/emulator.json"
+    },
+    {
+      "id": "pocketdaisy",
+      "path": "pocketdaisy/emulator.json"
+    },
+    {
+      "id": "pocketdaisy2",
+      "path": "pocketdaisy2/emulator.json"
+    },
+    {
+      "id": "pocketdaisy3",
+      "path": "pocketdaisy3/emulator.json"
     }
   ]
 }

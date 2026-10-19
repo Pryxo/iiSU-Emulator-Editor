@@ -1,0 +1,23 @@
+{
+  "description": "PokeDaisy by lidor30, https://pokedaisy.com/ | JSON by Pryxo",
+  "status": 1, 
+  "entries": [
+    {
+      "shortName": "gb",
+      "emulator": {
+        "id": "PocketDaisy",
+        "name": "PokeDaisy (Standalone)",
+        "routeType": "path",
+        "commands": [
+          {
+            "description": "ARMSX3",
+            "command": "com.pokedaisy.app/.LaunchActivity -e ROM %ROM%"
+          }
+        ],
+        "packages": [
+          "com.pokedaisy.app"
+        ]
+      }
+    }
+  ]
+}
