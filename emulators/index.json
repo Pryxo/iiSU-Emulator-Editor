@@ -58,16 +58,16 @@
       "path": "bannerhub2/emulator.json"
     },
     {
-      "id": "pocketdaisy",
-      "path": "pocketdaisy/emulator.json"
+      "id": "pokedaisy",
+      "path": "pokedaisy/emulator.json"
     },
     {
-      "id": "pocketdaisy2",
-      "path": "pocketdaisy2/emulator.json"
+      "id": "pokedaisy2",
+      "path": "pokedaisy2/emulator.json"
     },
     {
-      "id": "pocketdaisy3",
-      "path": "pocketdaisy3/emulator.json"
+      "id": "pokedaisy3",
+      "path": "pokedaisy3/emulator.json"
     }
   ]
 }
