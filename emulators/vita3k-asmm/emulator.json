@@ -1,0 +1,23 @@
+{
+  "description": "Vita3K-ASMM made by Cri4Key, https://github.com/Project-RePSASBR/Vita3K-ASMM | JSON Source by Pryxo",
+  "status": 1, 
+  "entries": [
+    {
+      "shortName": "psvita",
+      "emulator": {
+        "id": "vita3kasmm",
+        "name": "Vita3K ASMM (Standalone)",
+        "routeType": "fileContent",
+        "commands": [
+          {
+            "description": "Vita3K ASMM",
+            "command": "org.vita3k.emulator.asmm/org.vita3k.emulator.Emulator --esa \"AppStartParameters\" \"-r\",\"%ROM_CONTENT%\""
+          }
+        ],
+        "packages": [
+          "org.vita3k.emulator.asmm"
+        ]
+      }
+    }
+  ]
+}
