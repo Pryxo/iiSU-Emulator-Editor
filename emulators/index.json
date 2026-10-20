@@ -70,6 +70,10 @@
       "path": "pokedaisy3/emulator.json"
     },
     {
+      "id": "pokedaisy4",
+      "path": "pokedaisy4/emulator.json"
+    },
+    {
       "id": "vita3k-asmm",
       "path": "vita3k-asmm/emulator.json"
     }
