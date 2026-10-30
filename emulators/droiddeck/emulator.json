@@ -7,11 +7,11 @@
       "emulator": {
         "id": "droiddeck",
         "name": "DroidDeck (Standalone)",
-        "routeType": "uri",
+        "routeType": "url",
         "commands": [
           {
             "description": "DroidDeck (Standalone)",
-            "command": "com.droiddeck.launcher/com.droiddeck.launcher.MainActivity -a android.intent.action.VIEW -d %ROM_URI% --no-launcher-category"
+            "command": "%PACKAGE%/com.droiddeck.launcher.MainActivity -a android.intent.action.VIEW -d %ROM_CONTENT%"
           }
         ],
         "packages": [
