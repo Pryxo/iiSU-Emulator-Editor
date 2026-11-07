@@ -76,6 +76,10 @@
     {
       "id": "vita3k-asmm",
       "path": "vita3k-asmm/emulator.json"
+    },
+    {
+      "id": "gba-ds",
+      "path": "gba-ds/emulator.json"
     }
   ]
 }

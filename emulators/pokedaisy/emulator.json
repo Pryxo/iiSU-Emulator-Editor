@@ -1,21 +1,21 @@
 {
-  "description": "PokeDaisy by lidor30, https://pokedaisy.com/ | JSON by Pryxo",
-  "status": 2, 
+  "description": "GBA DS by kyannon, https://github.com/kyannon/gba-ds | JSON by Pryxo",
+  "status": 1, 
   "entries": [
     {
-      "shortName": "gb",
+      "shortName": "gba",
       "emulator": {
-        "id": "pokedaisy",
-        "name": "PokeDaisy (Standalone)",
+        "id": "gba-ds",
+        "name": "GBA DS (Standalone)",
         "routeType": "path",
         "commands": [
           {
-            "description": "PokeDaisy",
-            "command": "com.pokedaisy.app/.LaunchActivity -e ROM %ROM%"
+            "description": "GBA DS (Standalone)",
+            "command": "io.github.kyannon.gbads/.LauncherActivity -e rom %ROM_PATH%"
           }
         ],
         "packages": [
-          "com.pokedaisy.app"
+          "io.github.kyannon.gbads"
         ]
       }
     }
