@@ -24,6 +24,10 @@
     {
       "id": "steam",
       "path": "steam/console.json"
+    },
+    {
+      "id": "switch2",
+      "path": "switch2/console.json"
     }
   ]
 }

@@ -1,0 +1,16 @@
+{
+  "description": "Adds Switch 2 entry",
+  "console": {
+    "shortName": "switch2",
+    "longName": "Nintendo Switch 2",
+    "releaseYear": "2025",
+    "releaseDate": "2025-06-05",
+    "manufacturer": "Nintendo",
+    "retroAchievementsId": "NA",
+    "romExtensions": [
+      ".nup",
+      ".NUP"
+    ],
+    "emulators": []
+  }
+}

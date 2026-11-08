@@ -1,0 +1,23 @@
+{
+  "description": "Banana Native made by moceure, https://git.eden-emu.dev/moceure/BananaNative",
+  "status": 1, 
+  "entries": [
+    {
+      "shortName": "switch2",
+      "emulator": {
+        "id": "banananative",
+        "name": "Banana Native (Standalone)",
+        "routeType": "path",
+        "commands": [
+          {
+            "description": "Banana Native (Standalone)",
+            "command": "dev.bananative.android/dev.bananative.android.Launch -e game %ROM_PATH%"
+          }
+        ],
+        "packages": [
+          "dev.bananative.android"
+        ]
+      }
+    }
+  ]
+}

@@ -80,6 +80,10 @@
     {
       "id": "gba-ds",
       "path": "gba-ds/emulator.json"
+    },
+    {
+      "id": "banananative",
+      "path": "banananative/emulator.json"
     }
   ]
 }
