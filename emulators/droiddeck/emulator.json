@@ -7,11 +7,23 @@
       "emulator": {
         "id": "droiddeck",
         "name": "DroidDeck (Standalone)",
-        "routeType": "url",
+        "routeType": "fileContent",
         "commands": [
           {
-            "description": "DroidDeck (Standalone)",
-            "command": "%PACKAGE%/com.droiddeck.launcher.MainActivity -a android.intent.action.VIEW -d %ROM_CONTENT%"
+            "description": "DroidDeck",
+            "command": "%PACKAGE%/.MainActivity -a com.droiddeck.launcher.LAUNCH_GAME -e app_id %ROM_CONTENT%"
+          },
+          {
+            "description": "DroidDeck (Game URI)",
+            "command": "%PACKAGE%/.MainActivity -a android.intent.action.VIEW -d droiddeck://game/%ROM_CONTENT%"
+          },
+          {
+            "description": "DroidDeck (Game URI - Frontend)",
+            "command": "%PACKAGE%/.FrontEndActivity -a android.intent.action.VIEW -d droiddeck://game/%ROM_CONTENT%"
+          },
+          {
+            "description": "DroidDeck (Legacy)",
+            "command": "%PACKAGE%/.MainActivity -a app.gamenative.LAUNCH_GAME -e app_id %ROM_CONTENT%"
           }
         ],
         "packages": [
