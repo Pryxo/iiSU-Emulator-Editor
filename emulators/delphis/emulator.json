@@ -3,7 +3,7 @@
   "status": 1,
   "entries": [
     {
-      "shortName": "wiiu",
+      "shortName": "wii",
       "emulator": {
         "id": "delphis",
         "name": "Delphis (Standalone)",
