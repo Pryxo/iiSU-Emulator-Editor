@@ -1,0 +1,23 @@
+{
+  "description": "Delphis made by HiramRG, https://github.com/HiramRG/Delphis",
+  "status": 1,
+  "entries": [
+    {
+      "shortName": "gc",
+      "emulator": {
+        "id": "delphis",
+        "name": "Delphis (Standalone)",
+        "routeType": "uri",
+        "commands": [
+          {
+            "description": "Delphis (Standalone)",
+            "command": "io.github.hiramrg.delphis/.Play -a android.intent.action.VIEW -d %ROM_URI%"
+          }
+        ],
+        "packages": [
+          "io.github.hiramrg.delphis"
+        ]
+      }
+    }
+  ]
+}

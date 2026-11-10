@@ -88,6 +88,10 @@
     {
       "id": "delphis",
       "path": "delphis/emulator.json"
+    },
+    {
+      "id": "delphis1",
+      "path": "delphis1/emulator.json"
     }
   ]
 }
