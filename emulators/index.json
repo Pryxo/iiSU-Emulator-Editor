@@ -84,6 +84,10 @@
     {
       "id": "banananative",
       "path": "banananative/emulator.json"
+    },
+    {
+      "id": "delphis",
+      "path": "banananative/emulator.json"
     }
   ]
 }
