@@ -18,10 +18,6 @@
       "path": "kirin/console.json"
     },
     {
-      "id": "n3ds",
-      "path": "n3ds/console.json"
-    },
-    {
       "id": "steam",
       "path": "steam/console.json"
     },
