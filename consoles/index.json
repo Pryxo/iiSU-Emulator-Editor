@@ -24,6 +24,10 @@
     {
       "id": "switch2",
       "path": "switch2/console.json"
+    },
+    {
+      "id": "port",
+      "path": "port/console.json"
     }
   ]
 }
