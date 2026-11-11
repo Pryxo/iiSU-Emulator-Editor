@@ -1,0 +1,23 @@
+{
+  "description": "Pizza Boy Double Slice by Davide Berra, https://play.google.com/store/apps/details?id=com.pizzaemulators.pbds",
+  "status": 1, 
+  "entries": [
+    {
+      "shortName": "nds",
+      "emulator": {
+        "id": "pizzaboyds",
+        "name": "Pizza Boy Double Slice (Standalone)",
+        "routeType": "uri",
+        "commands": [
+          {
+            "description": "Pizza Boy Double Slice (Standalone)",
+            "command": "%PACKAGE%/.MainActivity -a android.intent.action.VIEW -d %ROM_URI%"
+          }
+        ],
+        "packages": [
+          "com.pizzaemulators.pbds"
+        ]
+      }
+    }
+  ]
+}

@@ -96,6 +96,10 @@
     {
       "id": "starboard",
       "path": "starboard/emulator.json"
+    },
+    {
+      "id": "pizzaboyds",
+      "path": "pizzaboyds/emulator.json"
     }
   ]
 }
