@@ -1,0 +1,23 @@
+{
+  "description": "Starboard by davestephens, https://github.com/get-starboard/starboard | JSON by 7ank0v1c",
+  "status": 2, 
+  "entries": [
+    {
+      "shortName": "ports",
+      "emulator": {
+        "id": "starboard",
+        "name": "Starboard (Standalone)",
+        "routeType": "path",
+        "commands": [
+          {
+            "description": "Starboard",
+            "command": "%PACKAGE%/.ui.game.GameActivity -e port_file \"%ROM%\""
+          }
+        ],
+        "packages": [
+          "org.force9.starboard"
+        ]
+      }
+    }
+  ]
+}

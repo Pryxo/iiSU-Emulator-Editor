@@ -92,6 +92,10 @@
     {
       "id": "delphis1",
       "path": "delphis1/emulator.json"
+    },
+    {
+      "id": "starboard",
+      "path": "starboard/emulator.json"
     }
   ]
 }
