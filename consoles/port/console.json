@@ -1,0 +1,24 @@
+{
+  "description": "Add Support for .port/.PORT",
+  "console": {
+    "shortName": "ports",
+    "longName": "Ports",
+    "releaseYear": "Various",
+    "releaseDate": "Various",
+    "manufacturer": "Various",
+    "retroAchievementsId": "NA",
+    "romExtensions": [
+      ".exe",
+      ".EXE",
+      ".game",
+      ".GAME",
+      ".phd",
+      ".PHD",
+      ".psx",
+      ".PSX",
+      ".port",
+      ".PORT"
+    ],
+    "emulators": []
+  }
+}
