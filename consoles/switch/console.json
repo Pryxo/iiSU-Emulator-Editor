@@ -1,0 +1,26 @@
+{
+  "description": "Adds Switch .nsz/.NSZ extension",
+  "console": {
+    "shortName": "switch",
+    "longName": "Nintendo Switch",
+    "releaseYear": "2017",
+    "releaseDate": "2017-03-03",
+    "manufacturer": "Nintendo",
+    "retroAchievementsId": "NA",
+    "romExtensions": [
+      ".nca",
+      ".NCA",
+      ".nro",
+      ".NRO",
+      ".nso",
+      ".NSO",
+      ".nsp",
+      ".NSP",
+      ".xci",
+      ".XCI",
+      ".nsz",
+      ".NSZ"
+    ],
+    "emulators": []
+  }
+}

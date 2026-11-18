@@ -28,6 +28,10 @@
     {
       "id": "port",
       "path": "port/console.json"
+    },
+        {
+      "id": "switch",
+      "path": "switch/console.json"
     }
   ]
 }
