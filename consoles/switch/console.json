@@ -1,5 +1,5 @@
 {
-  "description": "Adds .nsz/.NSZ extension, Adds .nup/.NUP extension ",
+  "description": "Adds .nsz/.NSZ extension, Adds .nup/.NUP extension, Adds .xcz/.XCZ extension ",
   "console": {
     "shortName": "switch",
     "longName": "Nintendo Switch",
@@ -21,7 +21,9 @@
       ".nsz",
       ".NSZ",
       ".nup",
-      ".NUP"
+      ".NUP",
+      ".xcz",
+      ".XCZ"
     ],
     "emulators": []
   }
